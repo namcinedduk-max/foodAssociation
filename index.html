@@ -3664,7 +3664,7 @@ async function saveNotices() {
 
 // 집행부 저장
 async function saveExec() {
-  saveExec();
+  LS.set('exec', D.exec);
   await saveToSupabase('exec_info', 1, D.exec);
 }
 
