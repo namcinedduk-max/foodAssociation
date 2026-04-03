@@ -1512,6 +1512,7 @@
         <div class="form-group"><label class="form-label">카테고리</label><input class="form-input" id="e-category" placeholder="예: 조미식품"></div>
         <div class="form-group"><label class="form-label">대표 이모지</label><input class="form-input" id="e-emoji" placeholder="예: 🍜"></div>
       </div>
+      <div class="form-group"><label class="form-label">사업장 주소</label><input class="form-input" id="e-address" placeholder="예: 대전 대덕구 대화로 50번길 57-37"></div>
       <div class="form-group"><label class="form-label">회사 소개</label><textarea class="form-input" id="e-desc" placeholder="회사 소개 입력"></textarea></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
         <div class="form-group"><label class="form-label">주요 제품 태그</label><input class="form-input" id="e-tags" placeholder="쉼표로 구분: 고추장, 된장"></div>
@@ -3266,7 +3267,8 @@ function openEditModal(id) {
   document.getElementById('e-desc').value     = m.desc||'';
   document.getElementById('e-tags').value     = (m.tags||[]).join(', ');
   document.getElementById('e-store').value    = m.store||'';
-  document.getElementById('e-address').value  = m.address||'';
+  const addrEl = document.getElementById('e-address');
+  if(addrEl) addrEl.value = m.address||'';
 
   setEditPhotoPreview(getPhoto('member', m.id), m.emoji);
   document.getElementById('edit-photo-input').value = '';
@@ -3360,7 +3362,7 @@ function saveEditMember() {
     email   : document.getElementById('e-email').value.trim(),
     category: document.getElementById('e-category').value.trim() || cur.category,
     emoji   : document.getElementById('e-emoji').value.trim() || cur.emoji,
-    address : document.getElementById('e-address').value.trim(),
+    address : (document.getElementById('e-address') ? document.getElementById('e-address').value.trim() : cur.address||''),
     desc    : document.getElementById('e-desc').value.trim(),
     tags    : document.getElementById('e-tags').value.split(',').map(function(t){return t.trim();}).filter(Boolean),
     store   : document.getElementById('e-store').value.trim(),
