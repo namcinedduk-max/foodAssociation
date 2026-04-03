@@ -1626,10 +1626,42 @@ let D = {
 let photoCache = {}; // key: 'member_ID' | 'gallery_ID' | 'exec_KEY' | 'exec_photo_KEY'
 
 async function loadAllPhotos() {
+  // 1. 로컬 IndexedDB에서 먼저 로드 (빠름)
   try {
     const all = await idbGetAll('');
     photoCache = all;
-  } catch(e) { console.warn('사진 로드 실패', e); }
+  } catch(e) { console.warn('로컬 사진 로드 실패', e); }
+
+  // 2. Supabase photos 테이블에서 로드 (공유된 사진)
+  try {
+    const { data, error } = await supa.from('photos').select('key, data');
+    if(!error && data) {
+      data.forEach(row => {
+        photoCache[row.key] = row.data;
+        // 로컬에도 캐시
+        idbSet(row.key, row.data).catch(()=>{});
+      });
+    }
+  } catch(e) { console.warn('Supabase 사진 로드 실패', e); }
+}
+
+// Supabase에 사진 저장 (idbSet을 대체)
+async function savePhoto(key, base64) {
+  // 로컬 캐시
+  photoCache[key] = base64;
+  // IndexedDB
+  try { await idbSet(key, base64); } catch(e) {}
+  // Supabase photos 테이블
+  try {
+    await supa.from('photos').upsert({ key, data: base64 });
+  } catch(e) { console.warn('Supabase 사진 저장 실패:', key, e); }
+}
+
+// Supabase에서 사진 삭제
+async function deletePhoto(key) {
+  delete photoCache[key];
+  try { await idbDelete(key); } catch(e) {}
+  try { await supa.from('photos').delete().eq('key', key); } catch(e) {}
 }
 
 function sampleMembers() { return [
@@ -2578,12 +2610,11 @@ async function submitFinal() {
 
     const photoOps=[];
     if(submitPendingPhoto) {
-      photoOps.push(uploadPhotoToSupabase('photos','member_'+memberId,submitPendingPhoto)
+      photoOps.push(savePhoto('member_'+memberId, submitPendingPhoto)
         .then(()=>{photoCache['member_'+memberId]=submitPendingPhoto;}));
     }
     if(submitPendingLogo) {
-      photoOps.push(uploadPhotoToSupabase('logos','logo_'+memberId,submitPendingLogo)
-        .then(()=>{photoCache['logo_'+memberId]=submitPendingLogo;}));
+      photoOps.push(savePhoto('logo_'+memberId, submitPendingLogo));
     }
     await Promise.all(photoOps);
     await saveMembers();
@@ -3080,7 +3111,7 @@ function saveExecMember(key) {
     const memberPhoto = getPhoto('member', m.id);
     if(memberPhoto) {
       photoCache['exec_'+key] = memberPhoto;
-      idbSet('exec_'+key, memberPhoto);
+      savePhoto('exec_'+key, memberPhoto);
     }
   }
 
@@ -3093,7 +3124,7 @@ function uploadExecPhoto(key, input) {
   const f = input.files[0]; if(!f) return;
   resizeToBase64(f, 400, 400, 0.85).then(b64 => {
     photoCache['exec_' + key] = b64;
-    return idbSet('exec_' + key, b64);
+    return savePhoto('exec_' + key, b64);
   }).then(() => {
     renderExecAdmin();
     renderOrg();
@@ -3102,7 +3133,7 @@ function uploadExecPhoto(key, input) {
 }
 function removeExecPhoto(key) {
   delete photoCache['exec_' + key];
-  idbDelete('exec_' + key).then(() => {
+  deletePhoto('exec_' + key).then(() => {
     renderExecAdmin();
     renderOrg();
     showToast('사진이 삭제되었습니다.');
@@ -3249,8 +3280,8 @@ function saveEditMember() {
   const photoOp = pendingEditPhoto === null
     ? Promise.resolve()
     : (pendingEditPhoto === ''
-        ? idbDelete('member_'+editingMemberId).then(()=>{ delete photoCache['member_'+editingMemberId]; })
-        : idbSet('member_'+editingMemberId, pendingEditPhoto).then(()=>{ photoCache['member_'+editingMemberId]=pendingEditPhoto; })
+        ? deletePhoto('member_'+editingMemberId)
+        : savePhoto('member_'+editingMemberId, pendingEditPhoto)
       );
 
   // 상품 사진 저장
@@ -3258,7 +3289,7 @@ function saveEditMember() {
     const key = `product_${editingMemberId}_${i}`;
     if(p.pendingPhoto) {
       photoCache[key] = p.pendingPhoto;
-      return idbSet(key, p.pendingPhoto);
+      return savePhoto(key, p.pendingPhoto);
     }
     return Promise.resolve();
   });
@@ -3273,8 +3304,8 @@ function saveEditMember() {
   const logoOp = pendingEditLogo === null
     ? Promise.resolve()
     : (pendingEditLogo === ''
-        ? idbDelete('logo_'+editingMemberId).then(()=>{ delete photoCache['logo_'+editingMemberId]; })
-        : idbSet('logo_'+editingMemberId, pendingEditLogo).then(()=>{ photoCache['logo_'+editingMemberId]=pendingEditLogo; })
+        ? deletePhoto('logo_'+editingMemberId)
+        : savePhoto('logo_'+editingMemberId, pendingEditLogo)
       );
 
   Promise.all([photoOp, logoOp, ...productPhotoOps]).then(()=>{
@@ -3307,8 +3338,8 @@ function addMember() {
   saveMembers();
 
   const ops = [];
-  if(photoToSave) ops.push(idbSet('member_'+newId, photoToSave).then(()=>{ photoCache['member_'+newId]=photoToSave; }));
-  if(logoToSave)  ops.push(idbSet('logo_'+newId, logoToSave).then(()=>{ photoCache['logo_'+newId]=logoToSave; }));
+  if(photoToSave) ops.push(savePhoto('member_'+newId, photoToSave));
+  if(logoToSave)  ops.push(savePhoto('logo_'+newId, logoToSave));
 
   Promise.all(ops).then(()=>{
     ['m-company','m-rep','m-phone','m-email','m-category','m-emoji','m-desc','m-tags','m-store'].forEach(id=>document.getElementById(id).value='');
@@ -3412,7 +3443,7 @@ function addGallery() {
     cat.pendingPhotos.forEach((b64, pi) => {
       const key = `gphoto_${newGid}_${ci}_${pi}`;
       photoCache[key] = b64;
-      photoOps.push(idbSet(key, b64));
+      photoOps.push(savePhoto(key, b64));
     });
   });
   Promise.all(photoOps).then(()=>{
@@ -3435,7 +3466,7 @@ function deleteGallery(id) {
       for(let pi=0;pi<(cat.count||0);pi++){
         const key=`gphoto_${id}_${ci}_${pi}`;
         delete photoCache[key];
-        ops.push(idbDelete(key));
+        ops.push(deletePhoto(key));
       }
     });
   }
