@@ -938,6 +938,10 @@
         <input class="form-input" id="submit-email" placeholder="hello@company.com">
       </div>
       <div class="form-group">
+        <label class="form-label">사업장 주소</label>
+        <input class="form-input" id="submit-address" placeholder="예: 대전 대덕구 대화로 50번길 57-37">
+      </div>
+      <div class="form-group">
         <label class="form-label">홈페이지 / 자사몰 주소</label>
         <input class="form-input" id="submit-store" placeholder="https://smartstore.naver.com/...">
       </div>
@@ -1179,6 +1183,7 @@
             </div>
           </div>
 
+          <div class="form-group"><label class="form-label">사업장 주소</label><input class="form-input" id="m-address" placeholder="예: 대전 대덕구 대화로 50번길 57-37"></div>
           <div class="form-group"><label class="form-label">회사 소개</label><textarea class="form-input" id="m-desc" placeholder="회사 주요 제품, 특장점 등을 간략히 입력하세요."></textarea></div>
           <div class="form-row">
             <div class="form-group"><label class="form-label">주요 제품 태그</label><input class="form-input" id="m-tags" placeholder="쉼표로 구분: 고추장, 된장, 쌈장"></div>
@@ -1359,6 +1364,14 @@
           <div class="form-group"><label class="form-label">새 비밀번호</label><input class="form-input" type="password" id="pw-new"></div>
           <div class="form-group"><label class="form-label">새 비밀번호 확인</label><input class="form-input" type="password" id="pw-confirm"></div>
           <button class="btn btn-primary" onclick="changePw()">비밀번호 변경</button>
+          <div class="divider"></div>
+          <h3 style="font-size:15px;color:var(--green-deep);margin-bottom:8px">📊 회원사 주소록 엑셀 다운로드</h3>
+          <p style="font-size:13px;color:var(--gray-dark);margin-bottom:12px">현재 등록된 회원사 전체 정보를 엑셀 파일로 다운로드합니다.</p>
+          <button class="btn btn-gold" onclick="downloadMemberExcel()">📥 주소록 엑셀 다운로드</button>
+          <div class="divider"></div>
+          <h3 style="font-size:15px;color:var(--green-deep);margin-bottom:8px">📊 회원사 주소록 엑셀 다운로드</h3>
+          <p style="font-size:13px;color:var(--gray-dark);margin-bottom:12px">현재 등록된 회원사 정보를 엑셀 파일로 다운로드합니다.</p>
+          <button class="btn btn-gold" onclick="downloadMemberExcel()">📥 주소록 엑셀 다운로드 (.xlsx)</button>
           <div class="divider"></div>
           <h3 style="font-size:15px;color:var(--green-deep);margin-bottom:8px">협회 정보</h3>
           <div class="form-group"><label class="form-label">총 회원사 수 (홈 화면 표시)</label><input class="form-input" type="number" id="s-count"></div>
@@ -1665,54 +1678,54 @@ async function deletePhoto(key) {
 }
 
 function sampleMembers() { return [
-  {id:1,company:"대호씨푸드",rep:"강대호",phone:"010-2936-5833",email:'',category:"수산가공",emoji:"🐟",desc:"[재무] 건어물제조 및 도,소매",tags:["건어물제조 및 도", "소매"],store:''},
-  {id:2,company:"㈜주안에프씨",rep:"김성수",phone:"010-5430-2981",email:'',category:"식품제조",emoji:"🍱",desc:"식품제조업, 무모한초밥",tags:["식품제조업", "무모한초밥"],store:''},
-  {id:3,company:"(주)화산푸드시스템",rep:"김현경",phone:"010-2613-6842",email:'',category:"유통",emoji:"📦",desc:"도소매, 운수, 식품제조 및 케이터링",tags:["도소매", "운수", "식품제조 및 케이터링"],store:''},
-  {id:4,company:"베트남이랑",rep:"김형근",phone:"010-2533-4777",email:'',category:"외식/프랜차이즈",emoji:"🍽️",desc:"프렌차이즈 요식업 베트남이랑",tags:["프렌차이즈 요식업 베트남이랑"],store:''},
-  {id:5,company:"남씨네전통식품",rep:"남종호",phone:"010-8280-9434",email:'',category:"떡류",emoji:"🍡",desc:"[사무국장] 떡제조",tags:["떡제조"],store:''},
-  {id:6,company:"㈜엠피프레쉬",rep:"노명균",phone:"010-3463-7401",email:'',category:"물류",emoji:"🚛",desc:"3자물류대행",tags:["3자물류대행"],store:''},
-  {id:7,company:"한빛푸드",rep:"노성민",phone:"010-9917-5400",email:'',category:"급식/케이터링",emoji:"🥘",desc:"단체, 위탁, 케이터링 급식",tags:["단체", "위탁", "케이터링 급식"],store:''},
-  {id:8,company:"까매요",rep:"문정희",phone:"010-9166-6700",email:'',category:"축산가공",emoji:"🥩",desc:"흑돈생산/가공 까매요 직영점",tags:["흑돈생산", "가공 까매요 직영점"],store:''},
-  {id:9,company:"범아식품",rep:"민경진",phone:"010-3742-5253",email:'',category:"식품제조",emoji:"🍱",desc:"곡물, 농산물제분, 가공",tags:["곡물", "농산물제분", "가공"],store:''},
-  {id:10,company:"제일산업",rep:"민승기",phone:"010-5458-4188",email:'',category:"식품용기",emoji:"📦",desc:"식품용기 전문업체",tags:["식품용기 전문업체"],store:''},
-  {id:11,company:"㈜메이크",rep:"박성우",phone:"010-5317-3252",email:'',category:"건강식품",emoji:"🌿",desc:"유기농식품직수입, 육류도,소매",tags:["유기농식품직수입", "육류도", "소매"],store:''},
-  {id:12,company:"㈜오웬푸드셰프애찬",rep:"박우연",phone:"010-8348-2800",email:'',category:"김치류",emoji:"🥬",desc:"[수석부회장] 김치, 게장, 반찬류 제조 전자상거래",tags:["김치", "게장", "반찬류 제조 전자상거래"],store:''},
-  {id:13,company:"녹돈영농조합법인",rep:"박유홍",phone:"010-4614-2278",email:'',category:"축산가공",emoji:"🥩",desc:"축산물 제조유통 고기장인 백정 가맹사업",tags:["축산물 제조유통 고기장인 백정 가맹사업"],store:''},
-  {id:14,company:"청아띠농업회사법인",rep:"배범근",phone:"010-9319-0877",email:'',category:"조미식품",emoji:"🌶️",desc:"고춧가루, 참기름, 들기름 등 제조",tags:["고춧가루", "참기름", "들기름 등 제조"],store:''},
-  {id:15,company:"㈜더한힘",rep:"송진석",phone:"010-4345-0454",email:'',category:"유통",emoji:"📦",desc:"일동 침향환 전국총판, 유통",tags:["일동 침향환 전국총판", "유통"],store:''},
-  {id:16,company:"㈜동그랑유통",rep:"안종대",phone:"010-5408-0485",email:'',category:"물류",emoji:"🚛",desc:"종합식자재 중부권 최대물류 유통",tags:["종합식자재 중부권 최대물류 유통"],store:''},
-  {id:17,company:"㈜참바른",rep:"양천석",phone:"010-9156-9808",email:'',category:"유통",emoji:"📦",desc:"도소매업",tags:["도소매업"],store:''},
-  {id:18,company:"㈜신탄진주조",rep:"유석헌",phone:"010-5011-1440",email:'',category:"주류",emoji:"🍶",desc:"[부회장] 막걸리, 청주, 약주제조",tags:["막걸리", "청주", "약주제조"],store:''},
-  {id:19,company:"㈜만풍농업법인",rep:"윤석중",phone:"010-5137-1171",email:'',category:"떡류",emoji:"🍡",desc:"떡, 곡류, 두류제조",tags:["곡류", "두류제조"],store:''},
-  {id:20,company:"㈜달미식품",rep:"윤여홍",phone:"010-3393-0546",email:'',category:"양념육",emoji:"🥩",desc:"불고기, 제육볶음, 기타양념육 제조",tags:["불고기", "제육볶음", "기타양념육 제조"],store:''},
-  {id:21,company:"주호식품",rep:"윤주일",phone:"010-4748-4720",email:'',category:"떡류",emoji:"🍡",desc:"냉동떡 쌀국수제조",tags:["냉동떡 쌀국수제조"],store:''},
-  {id:22,company:"㈜세우리식품",rep:"이규복",phone:"010-8977-7875",email:'',category:"김치류",emoji:"🥬",desc:"김치제조, 일회용품 유통",tags:["김치제조", "일회용품 유통"],store:''},
-  {id:23,company:"㈜세융푸드시스템",rep:"이서한",phone:"010-3928-1385",email:'',category:"축산가공",emoji:"🥩",desc:"축산물 제조유통 고기장인 백정 가맹사업",tags:["축산물 제조유통 고기장인 백정 가맹사업"],store:''},
-  {id:24,company:"㈜에브릿",rep:"이영환",phone:"010-3449-6028",email:'',category:"외식/프랜차이즈",emoji:"🍽️",desc:"[회장] 이화수육개장 가맹사업 프리마인(네트웍마케팅)",tags:["이화수육개장 가맹사업 프리마인(네트웍마케팅)"],store:''},
-  {id:25,company:"드래곤팩토리",rep:"이용민",phone:"010-2911-0449",email:'',category:"축산가공",emoji:"🥩",desc:"닭발가공, 유성닭발 가맹사업",tags:["닭발가공", "유성닭발 가맹사업"],store:''},
-  {id:26,company:"화심영농조합법인",rep:"이원규",phone:"010-5584-2803",email:'',category:"베이커리/제과",emoji:"🍞",desc:"즉석용기밥, 빵가루",tags:["즉석용기밥", "빵가루"],store:''},
-  {id:27,company:"이가네식품",rep:"이재수",phone:"010-5426-7136",email:'',category:"양념육",emoji:"🥩",desc:"냉면육수, 탕류ㅡ 양념육 제조",tags:["냉면육수", "탕류ㅡ 양념육 제조"],store:''},
-  {id:28,company:"미스터베이커리",rep:"이향숙",phone:"010-6639-0740",email:'',category:"베이커리/제과",emoji:"🍞",desc:"빵류, 과자류제조",tags:["빵류", "과자류제조"],store:''},
-  {id:29,company:"㈜팜토리",rep:"정대홍",phone:"010-2062-0069",email:'',category:"식품제조",emoji:"🍱",desc:"야채 제조업",tags:["야채 제조업"],store:''},
-  {id:30,company:"㈜금진식품",rep:"정세윤",phone:"010-2466-3537",email:'',category:"조미식품",emoji:"🌶️",desc:"소스류, 복합조미식품 제조",tags:["소스류", "복합조미식품 제조"],store:''},
-  {id:31,company:"㈜신흥제과",rep:"최용준",phone:"010-9404-8555",email:'',category:"베이커리/제과",emoji:"🍞",desc:"건빵, 쿠키, 과자류 제조",tags:["건빵", "쿠키", "과자류 제조"],store:''},
+  {id:1,company:"대호씨푸드",rep:"강대호",phone:"010-2936-5833",email:'',category:"수산가공",emoji:"🐟",desc:"[재무] 건어물제조 및 도,소매",tags:["건어물제조 및 도", "소매"],store:'',address:'대전 대덕구 오정동 103-3 대호씨푸드'},
+  {id:2,company:"㈜주안에프씨",rep:"김성수",phone:"010-5430-2981",email:'',category:"식품제조",emoji:"🍱",desc:"식품제조업, 무모한초밥",tags:["식품제조업", "무모한초밥"],store:'',address:'천안시 서북구 불당 26로80 402-1402호 지웰시티푸르지오 apt'},
+  {id:3,company:"(주)화산푸드시스템",rep:"김현경",phone:"010-2613-6842",email:'',category:"유통",emoji:"📦",desc:"도소매, 운수, 식품제조 및 케이터링",tags:["도소매", "운수", "식품제조 및 케이터링"],store:'',address:'경기도 수원시 권선구 망포로 14 수원하늘채더퍼스트 211동 205호'},
+  {id:4,company:"베트남이랑",rep:"김형근",phone:"010-2533-4777",email:'',category:"외식/프랜차이즈",emoji:"🍽️",desc:"프렌차이즈 요식업 베트남이랑",tags:["프렌차이즈 요식업 베트남이랑"],store:'',address:'서울 강남구 논현동22번지 논현 아파트 101동1105호'},
+  {id:5,company:"남씨네전통식품",rep:"남종호",phone:"010-8280-9434",email:'',category:"떡류",emoji:"🍡",desc:"[사무국장] 떡제조",tags:["떡제조"],store:'',address:'대전 중구 대사동 71-6'},
+  {id:6,company:"㈜엠피프레쉬",rep:"노명균",phone:"010-3463-7401",email:'',category:"물류",emoji:"🚛",desc:"3자물류대행",tags:["3자물류대행"],store:'',address:'천안시 서북구 한들 3로78-68 백석센트레빌 103동 2403호'},
+  {id:7,company:"한빛푸드",rep:"노성민",phone:"010-9917-5400",email:'',category:"급식/케이터링",emoji:"🥘",desc:"단체, 위탁, 케이터링 급식",tags:["단체", "위탁", "케이터링 급식"],store:'',address:'대전 유성구 테크노 4로 17 대덕비지니스센터A동 712호'},
+  {id:8,company:"까매요",rep:"문정희",phone:"010-9166-6700",email:'',category:"축산가공",emoji:"🥩",desc:"흑돈생산/가공 까매요 직영점",tags:["흑돈생산", "가공 까매요 직영점"],store:'',address:'경남 함양군 함양읍 상림 1길 13-7 (까매요)'},
+  {id:9,company:"범아식품",rep:"민경진",phone:"010-3742-5253",email:'',category:"식품제조",emoji:"🍱",desc:"곡물, 농산물제분, 가공",tags:["곡물", "농산물제분", "가공"],store:'',address:'충북 음성군 생극산단길60 (주)범아식품'},
+  {id:10,company:"제일산업",rep:"민승기",phone:"010-5458-4188",email:'',category:"식품용기",emoji:"📦",desc:"식품용기 전문업체",tags:["식품용기 전문업체"],store:'',address:'서구 원도안로100 (도안 베르디움)107동1502호'},
+  {id:11,company:"㈜메이크",rep:"박성우",phone:"010-5317-3252",email:'',category:"건강식품",emoji:"🌿",desc:"유기농식품직수입, 육류도,소매",tags:["유기농식품직수입", "육류도", "소매"],store:'',address:'용인시 기흥구 용구대로2394번길27 109동1003호 (마북동삼성래미안1차'},
+  {id:12,company:"㈜오웬푸드셰프애찬",rep:"박우연",phone:"010-8348-2800",email:'',category:"김치류",emoji:"🥬",desc:"[수석부회장] 김치, 게장, 반찬류 제조 전자상거래",tags:["김치", "게장", "반찬류 제조 전자상거래"],store:'',address:'대전시 동구 판암동 199-3 4층'},
+  {id:13,company:"녹돈영농조합법인",rep:"박유홍",phone:"010-4614-2278",email:'',category:"축산가공",emoji:"🥩",desc:"축산물 제조유통 고기장인 백정 가맹사업",tags:["축산물 제조유통 고기장인 백정 가맹사업"],store:'',address:'경기 평택시 청북읍 청오로 439-18'},
+  {id:14,company:"청아띠농업회사법인",rep:"배범근",phone:"010-9319-0877",email:'',category:"조미식품",emoji:"🌶️",desc:"고춧가루, 참기름, 들기름 등 제조",tags:["고춧가루", "참기름", "들기름 등 제조"],store:'',address:'경북 의성군 농공마전길 32-13 청아띠'},
+  {id:15,company:"㈜더한힘",rep:"송진석",phone:"010-4345-0454",email:'',category:"유통",emoji:"📦",desc:"일동 침향환 전국총판, 유통",tags:["일동 침향환 전국총판", "유통"],store:'',address:'대전 중구 대흥로20 선교빌딩3층'},
+  {id:16,company:"㈜동그랑유통",rep:"안종대",phone:"010-5408-0485",email:'',category:"물류",emoji:"🚛",desc:"종합식자재 중부권 최대물류 유통",tags:["종합식자재 중부권 최대물류 유통"],store:'',address:'대전 대덕구 대화로150번길 42-42'},
+  {id:17,company:"㈜참바른",rep:"양천석",phone:"010-9156-9808",email:'',category:"유통",emoji:"📦",desc:"도소매업",tags:["도소매업"],store:'',address:'천안시 서북구 두정동 2036 한성3차 필하우스 후문 상가동 4층 402호'},
+  {id:18,company:"㈜신탄진주조",rep:"유석헌",phone:"010-5011-1440",email:'',category:"주류",emoji:"🍶",desc:"[부회장] 막걸리, 청주, 약주제조",tags:["막걸리", "청주", "약주제조"],store:'',address:'세종 시청대로500 수루배마을4단지421동2001호(반곡동)'},
+  {id:19,company:"㈜만풍농업법인",rep:"윤석중",phone:"010-5137-1171",email:'',category:"떡류",emoji:"🍡",desc:"떡, 곡류, 두류제조",tags:["곡류", "두류제조"],store:'',address:'대전 유성구 용산1로 83 호반써밋그랜드파크302동 902호'},
+  {id:20,company:"㈜달미식품",rep:"윤여홍",phone:"010-3393-0546",email:'',category:"양념육",emoji:"🥩",desc:"불고기, 제육볶음, 기타양념육 제조",tags:["불고기", "제육볶음", "기타양념육 제조"],store:'',address:'세종 국책연구원1로15 912동1206호(소담동)'},
+  {id:21,company:"주호식품",rep:"윤주일",phone:"010-4748-4720",email:'',category:"떡류",emoji:"🍡",desc:"냉동떡 쌀국수제조",tags:["냉동떡 쌀국수제조"],store:'',address:'경기 용인시 처인구 원삼면 농촌파크로 162'},
+  {id:22,company:"㈜세우리식품",rep:"이규복",phone:"010-8977-7875",email:'',category:"김치류",emoji:"🥬",desc:"김치제조, 일회용품 유통",tags:["김치제조", "일회용품 유통"],store:'',address:'청주 서원구 현도면 시목외천로 137-1 (주)세우리식품'},
+  {id:23,company:"㈜세융푸드시스템",rep:"이서한",phone:"010-3928-1385",email:'',category:"축산가공",emoji:"🥩",desc:"축산물 제조유통 고기장인 백정 가맹사업",tags:["축산물 제조유통 고기장인 백정 가맹사업"],store:'',address:'경남 김해시 유하로 133번길 92-10(유하동)'},
+  {id:24,company:"㈜에브릿",rep:"이영환",phone:"010-3449-6028",email:'',category:"외식/프랜차이즈",emoji:"🍽️",desc:"[회장] 이화수육개장 가맹사업 프리마인(네트웍마케팅)",tags:["이화수육개장 가맹사업 프리마인(네트웍마케팅)"],store:'',address:'대전 유성구 상대동 한라비발디302동801호'},
+  {id:25,company:"드래곤팩토리",rep:"이용민",phone:"010-2911-0449",email:'',category:"축산가공",emoji:"🥩",desc:"닭발가공, 유성닭발 가맹사업",tags:["닭발가공", "유성닭발 가맹사업"],store:'',address:'대전 유성구 원내로39번길100.드래곤 팩토리.'},
+  {id:26,company:"화심영농조합법인",rep:"이원규",phone:"010-5584-2803",email:'',category:"베이커리/제과",emoji:"🍞",desc:"즉석용기밥, 빵가루",tags:["즉석용기밥", "빵가루"],store:'',address:'광주광역시 광산구 장덕로 137번길 39 수완 코오롱 하늘채 107동 701호'},
+  {id:27,company:"이가네식품",rep:"이재수",phone:"010-5426-7136",email:'',category:"양념육",emoji:"🥩",desc:"냉면육수, 탕류ㅡ 양념육 제조",tags:["냉면육수", "탕류ㅡ 양념육 제조"],store:'',address:'대전 대덕구 상서동 326-80번지 이가네 식품'},
+  {id:28,company:"미스터베이커리",rep:"이향숙",phone:"010-6639-0740",email:'',category:"베이커리/제과",emoji:"🍞",desc:"빵류, 과자류제조",tags:["빵류", "과자류제조"],store:'',address:'대전 동구 안골로28번지15-5. (주)미스터베이커리'},
+  {id:29,company:"㈜팜토리",rep:"정대홍",phone:"010-2062-0069",email:'',category:"식품제조",emoji:"🍱",desc:"야채 제조업",tags:["야채 제조업"],store:'',address:'충북 청주시 흥덕구 오송읍 오송생명 9로 10'},
+  {id:30,company:"㈜금진식품",rep:"정세윤",phone:"010-2466-3537",email:'',category:"조미식품",emoji:"🌶️",desc:"소스류, 복합조미식품 제조",tags:["소스류", "복합조미식품 제조"],store:'',address:'충남 천안시 동남구 다가말2길54 한화꿈에그린아파트 105동103호'},
+  {id:31,company:"㈜신흥제과",rep:"최용준",phone:"010-9404-8555",email:'',category:"베이커리/제과",emoji:"🍞",desc:"건빵, 쿠키, 과자류 제조",tags:["건빵", "쿠키", "과자류 제조"],store:'',address:'대전 서구 둔산로155 114동 403호(둔산동)'},
   {id:32,company:"대청F&C",rep:"한상재",phone:"010-5408-7378",email:'contact@daecheong.co.kr',category:"수산가공",emoji:"🌊",
    desc:"국내 최고 품질의 김(海苔)을 생산하는 식품제조 전문기업입니다.\n\n1998년 설립 이래 25년 이상의 노하우를 바탕으로 청정 완도산 원초를 직접 계약 재배하여 원료부터 완제품까지 철저한 품질 관리 시스템을 운영하고 있습니다.\n\nHACCP 인증을 획득한 최신 생산 설비를 갖추고 있으며, 전국 주요 대형마트와 온라인 채널을 통해 연간 수백만 봉의 조미김을 공급하고 있습니다. 현재 식품제조협회 회원사로서 협회의 발전에 적극 기여하고 있습니다.",
    tags:["김밥김","조미김","파래김","돌김","HACCP인증","완도산 원초"],
-   store:'https://smartstore.naver.com/',
+   store:'https://smartstore.naver.com/',address:'대전 대덕구 대화로50번길 57-37 (주)대청에프앤씨',
    products:[
      {name:"프리미엄 조미김 (캔형)", desc:"완도산 돌김을 사용한 프리미엄 조미김. 첨가물 無, 들기름으로 고소함 극대화", emoji:"🥬"},
      {name:"김밥용 구운김 (대용량)", desc:"식당·급식 전용 대용량 구운김. 균일한 두께와 바삭한 식감이 특징", emoji:"🍱"},
      {name:"파래김 스낵 (어린이용)", desc:"국내산 파래를 이용한 어린이 전용 간식. 저염 설계, 오메가3 풍부", emoji:"🌿"},
      {name:"선물세트 (혼합 구성)", desc:"조미김·구운김·파래김 혼합 구성. 명절·선물용으로 최적화된 고급 패키지", emoji:"🎁"}
    ]},
-  {id:33,company:"㈜와이씨로지스",rep:"황윤철",phone:"010-3232-9192",email:'',category:"물류",emoji:"🚛",desc:"[사무국장] 전국물류, 식품물류, 전국화물운송",tags:["전국물류", "식품물류", "전국화물운송"],store:''},
-  {id:34,company:"㈜국제FC",rep:"황일근",phone:"010-8539-8296",email:'',category:"외식/프랜차이즈",emoji:"🍽️",desc:"국제통닭 가맹사업",tags:["국제통닭 가맹사업"],store:''},
-  {id:35,company:"아쿠아링크",rep:"배준현",phone:"010-9228-1440",email:'',category:"수산가공",emoji:"🐟",desc:"[2025 신규] 수산물 도매 및 소매업 / 무역 등",tags:["수산물 도매 및 소매업", "무역 등"],store:''},
-  {id:36,company:"카우스토리",rep:"김현식",phone:"010-9599-8829",email:'',category:"축산가공",emoji:"🥩",desc:"[2025 신규] 제조업/식육가공업",tags:["제조업", "식육가공업"],store:''},
-  {id:37,company:"브루잉랩(주)",rep:"조재근",phone:"010-5232-0616",email:'',category:"음료",emoji:"☕",desc:"[2025 신규] 액상커피(콜드브루) 제조",tags:["액상커피(콜드브루) 제조"],store:''},
-  {id:38,company:"(주)바다해찬",rep:"박한도",phone:"010-7166-9850",email:'',category:"수산가공",emoji:"🐟",desc:"[2025 신규] 수산물 제조업",tags:["수산물 제조업"],store:''},
-  {id:39,company:"(주)팝콘푸드",rep:"방준오",phone:"010-2290-3828",email:'',category:"식품제조",emoji:"🍱",desc:"[2025 신규] 추산물가공업, 포장업",tags:["추산물가공업", "포장업"],store:''}
+  {id:33,company:"㈜와이씨로지스",rep:"황윤철",phone:"010-3232-9192",email:'',category:"물류",emoji:"🚛",desc:"[사무국장] 전국물류, 식품물류, 전국화물운송",tags:["전국물류", "식품물류", "전국화물운송"],store:'',address:'경기도 안성시 대덕면 무능로 18'},
+  {id:34,company:"㈜국제FC",rep:"황일근",phone:"010-8539-8296",email:'',category:"외식/프랜차이즈",emoji:"🍽️",desc:"국제통닭 가맹사업",tags:["국제통닭 가맹사업"],store:'',address:'부산 사상구 학장로248번길 86'},
+  {id:35,company:"아쿠아링크",rep:"배준현",phone:"010-9228-1440",email:'',category:"수산가공",emoji:"🐟",desc:"[2025 신규] 수산물 도매 및 소매업 / 무역 등",tags:["수산물 도매 및 소매업", "무역 등"],store:'',address:'서울 강남구 테헤란로 78길 26, 5층 아쿠아링크'},
+  {id:36,company:"카우스토리",rep:"김현식",phone:"010-9599-8829",email:'',category:"축산가공",emoji:"🥩",desc:"[2025 신규] 제조업/식육가공업",tags:["제조업", "식육가공업"],store:'',address:'충북 청주시 청원구 내수읍 학평길 78-28 카우스토리'},
+  {id:37,company:"브루잉랩(주)",rep:"조재근",phone:"010-5232-0616",email:'',category:"음료",emoji:"☕",desc:"[2025 신규] 액상커피(콜드브루) 제조",tags:["액상커피(콜드브루) 제조"],store:'',address:'경기도 구리시 갈매순환로154, A-804호(갈매동,현대테라타워)'},
+  {id:38,company:"(주)바다해찬",rep:"박한도",phone:"010-7166-9850",email:'',category:"수산가공",emoji:"🐟",desc:"[2025 신규] 수산물 제조업",tags:["수산물 제조업"],store:'',address:'경남 통영시 도산면 남해안대로 2097-76'},
+  {id:39,company:"(주)팝콘푸드",rep:"방준오",phone:"010-2290-3828",email:'',category:"식품제조",emoji:"🍱",desc:"[2025 신규] 추산물가공업, 포장업",tags:["추산물가공업", "포장업"],store:'',address:'충남 천안시 동남구 병천며 송정리1길 84-14'}
 ]; }
 function sampleGallery() { return [
   {id:1,title:'2025년 1월 월례회',date:'2025-01-15',desc:'신년 첫 모임으로 회원사 새해 목표 공유 및 협력 방안 논의. 총 32명 참석.',location:'강남 OO한정식',emoji:'🎊'},
@@ -2525,6 +2538,7 @@ function submitStep1() {
     document.getElementById('submit-phone').value = submitTargetMember.phone||'';
     document.getElementById('submit-email').value = submitTargetMember.email||'';
     document.getElementById('submit-store').value = submitTargetMember.store||'';
+    document.getElementById('submit-address').value = submitTargetMember.address||'';
     document.getElementById('submit-desc').value  = (submitTargetMember.desc||'').replace(/^\[[^\]]+\]\s*/,'');
     document.getElementById('submit-tags').value  = (submitTargetMember.tags||[]).join(', ');
     // 기존 상품 슬롯 채우기 (사진 포함)
@@ -2595,6 +2609,7 @@ async function submitFinal() {
     const store = document.getElementById('submit-store').value.trim();
     const desc  = document.getElementById('submit-desc').value.trim();
     const tags  = document.getElementById('submit-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+    const address = document.getElementById('submit-address').value.trim();
     let memberId, updatedMember;
 
     if(submitType==='existing') {
@@ -2602,7 +2617,7 @@ async function submitFinal() {
       const products = submitProductSlots.length > 0
         ? submitProductSlots.map(p=>({name:p.name,desc:p.desc,emoji:p.emoji||'📦'}))
         : submitTargetMember.products || [];
-      updatedMember = Object.assign({},submitTargetMember,{rep,phone,email,store,desc,tags,products});
+      updatedMember = Object.assign({},submitTargetMember,{rep,phone,email,store,address,desc,tags,products});
       const idx=D.members.findIndex(m=>m.id===memberId);
       if(idx!==-1) D.members[idx]=updatedMember;
     } else {
@@ -2610,7 +2625,7 @@ async function submitFinal() {
       const company=document.getElementById('submit-new-company').value.trim();
       const category=document.getElementById('submit-new-category').value.trim()||'기타';
       const products=submitProductSlots.map(p=>({name:p.name,desc:p.desc,emoji:p.emoji||'📦'}));
-      updatedMember={id:memberId,company,rep,phone,email,category,emoji:'🏢',desc,tags,store,products};
+      updatedMember={id:memberId,company,rep,phone,email,category,emoji:'🏢',address,desc,tags,store,products};
       D.members.push(updatedMember);
     }
 
@@ -2993,6 +3008,35 @@ function removeSubmitProductPhoto(slotIdx, photoIdx) {
   renderSubmitProductSlots();
 }
 
+// ── 엑셀 다운로드 ─────────────────────────────────────────────
+function downloadMemberExcel() {
+  // CSV로 만들어서 엑셀로 저장 (SheetJS 없이 순수 CSV)
+  const BOM = '\uFEFF'; // 한글 깨짐 방지
+  const headers = ['번호','회사명','대표자','연락처','이메일','업종','사업장주소','홈페이지/자사몰','회사소개'];
+  const rows = D.members.map((m,i) => [
+    i+1,
+    m.company||'',
+    m.rep||'',
+    m.phone||'',
+    m.email||'',
+    m.category||'',
+    m.address||'',
+    m.store||'',
+    (m.desc||'').replace(/\n/g,' ').replace(/,/g,' '),
+  ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+
+  const csv = BOM + [headers.map(h=>`"${h}"`).join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const today = new Date().toISOString().split('T')[0];
+  a.download = `식품제조협회_회원사주소록_${today}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('주소록 다운로드 완료! (엑셀에서 열기 가능)');
+}
+
 function changeMemberPw() {
   if(!newPw) { showToast('새 비밀번호를 입력해주세요.'); return; }
   D.memberPw = newPw;
@@ -3222,6 +3266,7 @@ function openEditModal(id) {
   document.getElementById('e-desc').value     = m.desc||'';
   document.getElementById('e-tags').value     = (m.tags||[]).join(', ');
   document.getElementById('e-store').value    = m.store||'';
+  document.getElementById('e-address').value  = m.address||'';
 
   setEditPhotoPreview(getPhoto('member', m.id), m.emoji);
   document.getElementById('edit-photo-input').value = '';
@@ -3315,6 +3360,7 @@ function saveEditMember() {
     email   : document.getElementById('e-email').value.trim(),
     category: document.getElementById('e-category').value.trim() || cur.category,
     emoji   : document.getElementById('e-emoji').value.trim() || cur.emoji,
+    address : document.getElementById('e-address').value.trim(),
     desc    : document.getElementById('e-desc').value.trim(),
     tags    : document.getElementById('e-tags').value.split(',').map(function(t){return t.trim();}).filter(Boolean),
     store   : document.getElementById('e-store').value.trim(),
@@ -3372,6 +3418,7 @@ function addMember() {
     email: document.getElementById('m-email').value.trim(),
     category: document.getElementById('m-category').value.trim()||'기타',
     emoji: document.getElementById('m-emoji').value.trim()||'🏢',
+    address: document.getElementById('m-address').value.trim(),
     desc: document.getElementById('m-desc').value.trim(),
     tags: document.getElementById('m-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
     store: document.getElementById('m-store').value.trim(),
@@ -3736,10 +3783,10 @@ async function saveSettings() {
 async function initApp() {
   // 로컬 데이터 먼저 로드 (빠른 초기 렌더링)
   const dataVer = LS.get('dataVersion');
-  if (dataVer !== 'v4') {
+  if (dataVer !== 'v5') {
     D.members = sampleMembers();
     LS.set('members', D.members);
-    LS.set('dataVersion', 'v4');
+    LS.set('dataVersion', 'v5');
   }
   await loadAllPhotos();
   renderHome();
