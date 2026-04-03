@@ -479,6 +479,43 @@
   .logo-card-img img { width: 100%; height: 100%; object-fit: contain; }
   .logo-card-name { font-size: 11.5px; font-weight: 600; color: var(--brown); margin-bottom: 3px; word-break: keep-all; line-height: 1.35; font-family: 'DM Sans','Noto Sans KR',sans-serif; }
   .logo-card-cat { font-size: 10px; color: var(--gray-dark); }
+
+  /* ── 정보등록 페이지 ── */
+  .submit-hero { background: #0a0f0d; color: white; padding: 60px 24px 64px; text-align: center; position: relative; overflow: hidden; }
+  .submit-hero::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(201,168,76,0.08), transparent 70%); }
+  .submit-hero-content { position: relative; z-index: 1; }
+  .submit-hero h1 { font-family: 'Playfair Display','Noto Sans KR',serif; font-size: 32px; font-weight: 700; margin-bottom: 12px; }
+  .submit-hero p { font-size: 15px; color: rgba(255,255,255,0.6); line-height: 1.7; }
+
+  .submit-main { max-width: 720px; margin: 0 auto; padding: 40px 24px 80px; }
+  .submit-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); padding: 36px; margin-bottom: 20px; border: 1px solid var(--border); }
+  .submit-section-title { font-family: 'Playfair Display','Noto Sans KR',serif; font-size: 17px; font-weight: 700; color: var(--brown); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .submit-section-title::before { content:''; width:3px; height:20px; background: var(--gold); border-radius:2px; display:inline-block; flex-shrink:0; }
+
+  .submit-type-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  .submit-type-btn { padding: 18px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: var(--surface-2); cursor: pointer; text-align: center; transition: all 0.2s; font-family: 'Noto Sans KR',sans-serif; }
+  .submit-type-btn:hover { border-color: var(--gold); }
+  .submit-type-btn.selected { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+  .submit-type-btn .type-icon { font-size: 28px; margin-bottom: 8px; }
+  .submit-type-btn .type-label { font-size: 15px; font-weight: 700; color: var(--brown); margin-bottom: 4px; }
+  .submit-type-btn .type-desc { font-size: 12px; color: var(--gray-dark); }
+
+  .submit-photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .submit-photo-box { border: 2px dashed var(--border); border-radius: var(--radius-sm); padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--surface-2); }
+  .submit-photo-box:hover { border-color: var(--gold); background: white; }
+  .submit-photo-preview { width: 80px; height: 80px; margin: 0 auto 10px; border-radius: 12px; overflow: hidden; background: var(--cream-dark); display: flex; align-items: center; justify-content: center; font-size: 32px; }
+  .submit-photo-preview.circle { border-radius: 50%; }
+  .submit-photo-preview img { width:100%; height:100%; object-fit:cover; }
+  .submit-photo-label { font-size: 13px; font-weight: 600; color: var(--brown); margin-bottom: 4px; }
+  .submit-photo-hint { font-size: 11px; color: var(--gray-dark); }
+
+  .submit-progress { background: var(--surface-2); border-radius: 40px; height: 6px; margin-bottom: 32px; overflow: hidden; }
+  .submit-progress-bar { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 40px; transition: width 0.4s; }
+
+  .submit-success { text-align: center; padding: 60px 20px; }
+  .submit-success .success-icon { font-size: 64px; margin-bottom: 20px; }
+  .submit-success h2 { font-family: 'Playfair Display',serif; font-size: 26px; font-weight: 700; color: var(--brown); margin-bottom: 12px; }
+  .submit-success p { font-size: 15px; color: var(--gray-dark); line-height: 1.7; }
 </style>
 </head>
 <body>
@@ -497,6 +534,7 @@
       <button onclick="showPage('notice')">공지사항</button>
       <button onclick="showPage('finance-public')">💰 재무현황</button>
       <button onclick="showPage('docs')">📂 자료실</button>
+      <button onclick="showPage('submit')" style="background:rgba(201,168,76,0.15);color:var(--gold);border:1px solid rgba(201,168,76,0.3);border-radius:6px">✏️ 정보등록</button>
       <button class="admin-btn" onclick="showPage('admin')">⚙ 관리</button>
     </nav>
   </div>
@@ -802,6 +840,155 @@
 </div>
 
 <!-- NOTICE -->
+<!-- SUBMIT PAGE - 회원사 정보 등록 -->
+<div id="page-submit" class="page">
+  <div class="submit-hero">
+    <div class="submit-hero-content">
+      <div class="hero-badge" style="margin-bottom:16px">✏️ MEMBER INFO</div>
+      <h1>회원사 정보 등록</h1>
+      <p>회사 소개, 로고, 대표 사진을 등록해주세요.<br>홈페이지에 바로 반영됩니다.</p>
+    </div>
+  </div>
+
+  <div class="submit-main">
+    <!-- 비밀번호 확인 -->
+    <div id="submit-pw-box" class="submit-card">
+      <div class="submit-section-title">회원 인증</div>
+      <p style="font-size:14px;color:var(--gray-dark);margin-bottom:20px;line-height:1.7">
+        회원사 정보 등록은 협회 회원에게만 허용됩니다.<br>
+        단톡방에 공지된 비밀번호를 입력해주세요.
+      </p>
+      <div class="form-group">
+        <label class="form-label">비밀번호</label>
+        <input class="form-input" type="password" id="submit-pw-input" placeholder="비밀번호 입력"
+          onkeydown="if(event.key==='Enter') checkSubmitPw()">
+      </div>
+      <button class="btn btn-gold" style="width:100%" onclick="checkSubmitPw()">확인 →</button>
+    </div>
+
+    <!-- 진행바 -->
+    <div class="submit-progress" id="submit-progress-wrap" style="display:none">
+      <div class="submit-progress-bar" id="submit-progress-bar" style="width:33%"></div>
+    </div>
+
+    <!-- STEP 1: 구분 선택 -->
+    <div id="submit-step1" class="submit-card">
+      <div class="submit-section-title">회원 구분 선택</div>
+      <div class="submit-type-selector">
+        <div class="submit-type-btn selected" id="type-existing" onclick="selectSubmitType('existing')">
+          <div class="type-icon">🏢</div>
+          <div class="type-label">기존 회원</div>
+          <div class="type-desc">정보 업데이트</div>
+        </div>
+        <div class="submit-type-btn" id="type-new" onclick="selectSubmitType('new')">
+          <div class="type-icon">✨</div>
+          <div class="type-label">신규 회원</div>
+          <div class="type-desc">새로 등록</div>
+        </div>
+      </div>
+
+      <!-- 기존 회원: 드롭다운 -->
+      <div id="submit-existing-select">
+        <div class="form-group">
+          <label class="form-label">회사명 선택 <span class="req">*</span></label>
+          <select class="form-input" id="submit-company-select">
+            <option value="">-- 회사를 선택해주세요 --</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 신규 회원: 텍스트 입력 -->
+      <div id="submit-new-input" style="display:none">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">회사명 <span class="req">*</span></label>
+            <input class="form-input" id="submit-new-company" placeholder="예: (주)맛나식품">
+          </div>
+          <div class="form-group">
+            <label class="form-label">카테고리 <span class="req">*</span></label>
+            <input class="form-input" id="submit-new-category" placeholder="예: 조미식품, 수산가공">
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-gold" style="width:100%;margin-top:8px" onclick="submitStep1()">다음 단계 →</button>
+    </div>
+
+    <!-- STEP 2: 상세 정보 -->
+    <div id="submit-step2" class="submit-card" style="display:none">
+      <div class="submit-section-title">기본 정보</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">대표자명 <span class="req">*</span></label>
+          <input class="form-input" id="submit-rep" placeholder="홍길동">
+        </div>
+        <div class="form-group">
+          <label class="form-label">연락처 <span class="req">*</span></label>
+          <input class="form-input" id="submit-phone" placeholder="010-0000-0000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">이메일</label>
+        <input class="form-input" id="submit-email" placeholder="hello@company.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">홈페이지 / 자사몰 주소</label>
+        <input class="form-input" id="submit-store" placeholder="https://smartstore.naver.com/...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">회사 소개 <span class="opt">(200자 내외)</span></label>
+        <textarea class="form-input" id="submit-desc" style="min-height:120px" placeholder="회사의 주요 제품, 특장점, 연혁 등을 자유롭게 작성해주세요."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">주요 제품 · 서비스 태그</label>
+        <input class="form-input" id="submit-tags" placeholder="쉼표로 구분: 조미김, 구운김, 파래김">
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn" style="background:var(--surface-2);color:var(--gray-dark);flex:1" onclick="submitGoBack()">← 이전</button>
+        <button class="btn btn-gold" style="flex:2" onclick="submitStep2()">다음 단계 →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: 사진 업로드 -->
+    <div id="submit-step3" class="submit-card" style="display:none">
+      <div class="submit-section-title">사진 · 로고 업로드</div>
+      <p style="font-size:13px;color:var(--gray-dark);margin-bottom:20px;line-height:1.7">사진이 없어도 제출 가능합니다. 나중에 집행부를 통해 추가할 수 있어요.</p>
+      <div class="submit-photo-grid">
+        <!-- 대표자 사진 -->
+        <div class="submit-photo-box" onclick="document.getElementById('submit-photo-input').click()">
+          <input type="file" id="submit-photo-input" accept="image/*" style="display:none" onchange="previewSubmitPhoto(this)">
+          <div class="submit-photo-preview circle" id="submit-photo-preview"><span>📷</span></div>
+          <div class="submit-photo-label">대표자 사진</div>
+          <div class="submit-photo-hint">JPG · PNG / 얼굴 사진</div>
+        </div>
+        <!-- 회사 로고 -->
+        <div class="submit-photo-box" onclick="document.getElementById('submit-logo-input').click()">
+          <input type="file" id="submit-logo-input" accept="image/*" style="display:none" onchange="previewSubmitLogo(this)">
+          <div class="submit-photo-preview" id="submit-logo-preview"><span>🏢</span></div>
+          <div class="submit-photo-label">회사 로고</div>
+          <div class="submit-photo-hint">PNG 권장 / 흰 배경</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:24px">
+        <button class="btn" style="background:var(--surface-2);color:var(--gray-dark);flex:1" onclick="submitGoBack2()">← 이전</button>
+        <button class="btn btn-gold" style="flex:2" onclick="submitFinal()" id="submit-final-btn">✅ 제출하기</button>
+      </div>
+    </div>
+
+    <!-- 완료 화면 -->
+    <div id="submit-success" class="submit-card" style="display:none">
+      <div class="submit-success">
+        <div class="success-icon">🎉</div>
+        <h2>제출 완료!</h2>
+        <p>정보가 성공적으로 등록되었습니다.<br>홈페이지에 바로 반영됩니다.<br><br>감사합니다 😊</p>
+        <button class="btn btn-gold" style="margin-top:24px" onclick="showPage('members')">회원사 목록 보기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- DOCS PAGE -->
 <div id="page-docs" class="page">
   <div class="doc-hero">
@@ -1156,6 +1343,12 @@
           <h3 style="font-size:15px;color:var(--green-deep);margin-bottom:8px">협회 정보</h3>
           <div class="form-group"><label class="form-label">총 회원사 수 (홈 화면 표시)</label><input class="form-input" type="number" id="s-count"></div>
           <button class="btn btn-primary" onclick="saveSettings()">저장</button>
+          <div class="divider"></div>
+          <h3 style="font-size:15px;color:var(--green-deep);margin-bottom:8px">회원사 정보등록 비밀번호</h3>
+          <p style="font-size:13px;color:var(--gray-dark);margin-bottom:12px">✏️ 정보등록 페이지 접근 시 필요한 비밀번호입니다. 단톡방에 공유해주세요.</p>
+          <div class="form-group"><label class="form-label">현재 비밀번호</label><div class="form-input" style="background:var(--cream-dark);cursor:default" id="member-pw-display"></div></div>
+          <div class="form-group"><label class="form-label">새 비밀번호</label><input class="form-input" type="text" id="member-pw-new" placeholder="새 비밀번호 입력"></div>
+          <button class="btn btn-gold" onclick="changeMemberPw()">회원 비밀번호 변경</button>
         </div>
       </div>
     </div>
@@ -1407,6 +1600,7 @@ let D = {
   settings: LS.get('settings') || { totalMembers: 40 },
   finance: LS.get('finance') || { feeYear: new Date().getFullYear(), feeAmount: 100000, fees: {}, transactions: [], balance: 0 },
   docs: LS.get('docs') || [],
+  memberPw: LS.get('memberPw') || 'food2025',
 };
 // 런타임 사진 캐시 (IndexedDB에서 로드한 사진)
 let photoCache = {}; // key: 'member_ID' | 'gallery_ID' | 'exec_KEY' | 'exec_photo_KEY'
@@ -1488,7 +1682,7 @@ function showPage(page, scrollTop=true) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-  ['home','org','members','gallery','notice','finance-public','docs'].forEach((p,i)=>{
+  ['home','org','members','gallery','notice','finance-public','docs','submit'].forEach((p,i)=>{
     if(p===page) document.querySelectorAll('nav button')[i].classList.add('active');
   });
   if(page==='home') renderHome();
@@ -1498,6 +1692,7 @@ function showPage(page, scrollTop=true) {
   if(page==='notice') renderNotices(document.getElementById('notice-list'));
   if(page==='finance-public') renderPublicFinance();
   if(page==='docs') renderDocs();
+  if(page==='submit') initSubmitPage();
   if(page==='admin' && isAdmin) renderAdminLists();
   if(scrollTop) window.scrollTo(0,0);
 }
@@ -2020,6 +2215,10 @@ function switchAdminTab(tab, btn) {
   if(tab==='finance') initFinanceTab();
   if(tab==='gallery') initGalleryPhotoSlots();
   if(tab==='docs') renderAdminDocs();
+  if(tab==='settings') {
+    const el = document.getElementById('member-pw-display');
+    if(el) el.textContent = D.memberPw || 'food2025';
+  }
 }
 // ── DOCS (자료실) ─────────────────────────────────────────────
 const FILE_ICONS = {
@@ -2205,6 +2404,170 @@ function renderAdminDocs() {
     </div>`).join('') || '<p style="font-size:13px;color:var(--gray-dark)">등록된 자료가 없습니다.</p>';
 }
 
+
+// ── 정보등록 페이지 ───────────────────────────────────────────
+let submitType = 'existing';
+let submitPendingPhoto = '';
+let submitPendingLogo = '';
+let submitTargetMember = null;
+
+function initSubmitPage() {
+  submitType = 'existing';
+  submitPendingPhoto = '';
+  submitPendingLogo = '';
+  submitTargetMember = null;
+
+  // 비밀번호 화면부터 시작
+  document.getElementById('submit-pw-box').style.display = 'block';
+  document.getElementById('submit-pw-input').value = '';
+  document.getElementById('submit-progress-wrap').style.display = 'none';
+  document.getElementById('submit-step1').style.display = 'none';
+  document.getElementById('submit-step2').style.display = 'none';
+  document.getElementById('submit-step3').style.display = 'none';
+  document.getElementById('submit-success').style.display = 'none';
+}
+
+function checkSubmitPw() {
+  const pw = document.getElementById('submit-pw-input').value;
+  if(pw !== D.memberPw) { showToast('비밀번호가 올바르지 않습니다.'); return; }
+  document.getElementById('submit-pw-box').style.display = 'none';
+  document.getElementById('submit-progress-wrap').style.display = 'block';
+  document.getElementById('submit-progress-bar').style.width = '33%';
+
+  const sel = document.getElementById('submit-company-select');
+  sel.innerHTML = '<option value="">-- 회사를 선택해주세요 --</option>';
+  [...D.members].sort((a,b)=>a.company.localeCompare(b.company,'ko')).forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.company + ' (' + m.rep + ')';
+    sel.appendChild(opt);
+  });
+  selectSubmitType('existing');
+  ['submit-rep','submit-phone','submit-email','submit-store','submit-desc','submit-tags','submit-new-company','submit-new-category'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  document.getElementById('submit-photo-preview').innerHTML = '<span>📷</span>';
+  document.getElementById('submit-logo-preview').innerHTML = '<span>🏢</span>';
+  document.getElementById('submit-step1').style.display = 'block';
+}
+
+function selectSubmitType(type) {
+  submitType = type;
+  document.getElementById('type-existing').classList.toggle('selected', type==='existing');
+  document.getElementById('type-new').classList.toggle('selected', type==='new');
+  document.getElementById('submit-existing-select').style.display = type==='existing'?'block':'none';
+  document.getElementById('submit-new-input').style.display = type==='new'?'block':'none';
+}
+
+function submitStep1() {
+  if(submitType==='existing') {
+    const memberId = parseInt(document.getElementById('submit-company-select').value);
+    if(!memberId) { showToast('회사를 선택해주세요.'); return; }
+    submitTargetMember = D.members.find(m=>m.id===memberId);
+    if(!submitTargetMember) { showToast('회사를 찾을 수 없습니다.'); return; }
+    document.getElementById('submit-rep').value   = submitTargetMember.rep||'';
+    document.getElementById('submit-phone').value = submitTargetMember.phone||'';
+    document.getElementById('submit-email').value = submitTargetMember.email||'';
+    document.getElementById('submit-store').value = submitTargetMember.store||'';
+    document.getElementById('submit-desc').value  = (submitTargetMember.desc||'').replace(/^\[[^\]]+\]\s*/,'');
+    document.getElementById('submit-tags').value  = (submitTargetMember.tags||[]).join(', ');
+  } else {
+    if(!document.getElementById('submit-new-company').value.trim()) { showToast('회사명을 입력해주세요.'); return; }
+  }
+  document.getElementById('submit-step1').style.display='none';
+  document.getElementById('submit-step2').style.display='block';
+  document.getElementById('submit-progress-bar').style.width='66%';
+  window.scrollTo(0,0);
+}
+
+function submitGoBack() {
+  document.getElementById('submit-step2').style.display='none';
+  document.getElementById('submit-step1').style.display='block';
+  document.getElementById('submit-progress-bar').style.width='33%';
+  window.scrollTo(0,0);
+}
+
+function submitStep2() {
+  if(!document.getElementById('submit-rep').value.trim()||!document.getElementById('submit-phone').value.trim()) {
+    showToast('대표자명과 연락처는 필수입니다.'); return;
+  }
+  document.getElementById('submit-step2').style.display='none';
+  document.getElementById('submit-step3').style.display='block';
+  document.getElementById('submit-progress-bar').style.width='100%';
+  window.scrollTo(0,0);
+}
+
+function submitGoBack2() {
+  document.getElementById('submit-step3').style.display='none';
+  document.getElementById('submit-step2').style.display='block';
+  document.getElementById('submit-progress-bar').style.width='66%';
+  window.scrollTo(0,0);
+}
+
+function previewSubmitPhoto(input) {
+  const f=input.files[0]; if(!f) return;
+  resizeToBase64(f,400,400,0.85).then(b64=>{
+    submitPendingPhoto=b64;
+    document.getElementById('submit-photo-preview').innerHTML='<img src="'+b64+'" style="width:100%;height:100%;object-fit:cover">';
+  });
+}
+
+function previewSubmitLogo(input) {
+  const f=input.files[0]; if(!f) return;
+  resizeToBase64(f,400,400,0.88).then(b64=>{
+    submitPendingLogo=b64;
+    document.getElementById('submit-logo-preview').innerHTML='<img src="'+b64+'" style="width:100%;height:100%;object-fit:contain">';
+  });
+}
+
+async function submitFinal() {
+  const btn=document.getElementById('submit-final-btn');
+  btn.textContent='저장 중...'; btn.disabled=true;
+  try {
+    const rep   = document.getElementById('submit-rep').value.trim();
+    const phone = document.getElementById('submit-phone').value.trim();
+    const email = document.getElementById('submit-email').value.trim();
+    const store = document.getElementById('submit-store').value.trim();
+    const desc  = document.getElementById('submit-desc').value.trim();
+    const tags  = document.getElementById('submit-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+    let memberId, updatedMember;
+
+    if(submitType==='existing') {
+      memberId = submitTargetMember.id;
+      updatedMember = Object.assign({},submitTargetMember,{rep,phone,email,store,desc,tags});
+      const idx=D.members.findIndex(m=>m.id===memberId);
+      if(idx!==-1) D.members[idx]=updatedMember;
+    } else {
+      memberId=Date.now();
+      const company=document.getElementById('submit-new-company').value.trim();
+      const category=document.getElementById('submit-new-category').value.trim()||'기타';
+      updatedMember={id:memberId,company,rep,phone,email,category,emoji:'🏢',desc,tags,store};
+      D.members.push(updatedMember);
+    }
+
+    const photoOps=[];
+    if(submitPendingPhoto) {
+      photoOps.push(uploadPhotoToSupabase('photos','member_'+memberId,submitPendingPhoto)
+        .then(()=>{photoCache['member_'+memberId]=submitPendingPhoto;}));
+    }
+    if(submitPendingLogo) {
+      photoOps.push(uploadPhotoToSupabase('logos','logo_'+memberId,submitPendingLogo)
+        .then(()=>{photoCache['logo_'+memberId]=submitPendingLogo;}));
+    }
+    await Promise.all(photoOps);
+    await saveMembers();
+
+    document.getElementById('submit-step3').style.display='none';
+    document.getElementById('submit-success').style.display='block';
+    window.scrollTo(0,0);
+    renderHome();
+  } catch(e) {
+    console.error(e);
+    showToast('제출 중 오류가 발생했습니다. 다시 시도해주세요.');
+  } finally {
+    btn.textContent='✅ 제출하기'; btn.disabled=false;
+  }
+}
 
 function renderPublicFinance() {
   const fin = D.finance;
@@ -2460,6 +2823,17 @@ function renderTransactions() {
     </div>`).join('');
 }
 
+
+function changeMemberPw() {
+  const newPw = document.getElementById('member-pw-new').value.trim();
+  if(!newPw) { showToast('새 비밀번호를 입력해주세요.'); return; }
+  D.memberPw = newPw;
+  LS.set('memberPw', newPw);
+  saveToSupabase('settings', 1, D.settings);
+  document.getElementById('member-pw-display').textContent = newPw;
+  document.getElementById('member-pw-new').value = '';
+  showToast('회원 비밀번호가 변경되었습니다!');
+}
 
 function renderAdminLists() {
   renderExecAdmin();
