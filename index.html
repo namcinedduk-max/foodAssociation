@@ -265,12 +265,18 @@
   .exec-admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; }
   .exec-admin-card { background: var(--gray-light); border-radius: var(--radius-sm); padding: 18px 14px; text-align: center; }
   .exec-admin-card .role-label { font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 1px; margin-bottom: 12px; }
-  .exec-admin-photo { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 10px; overflow: hidden; background: var(--cream-dark); display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; border: 2px dashed var(--gray-mid); transition: all 0.2s; position: relative; }
-  .exec-admin-photo:hover { border-color: var(--green-light); }
+  .exec-admin-photo { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 10px; overflow: hidden; background: var(--cream-dark); display: flex; align-items: center; justify-content: center; font-size: 30px; border: 2px solid var(--gray-mid); position: relative; }
   .exec-admin-photo img { width: 100%; height: 100%; object-fit: cover; }
-  .exec-admin-photo input[type="file"] { display: none; }
-  .upload-overlay { display: none; position: absolute; inset: 0; border-radius: 50%; background: rgba(28,61,46,0.65); color: white; font-size: 10px; align-items: center; justify-content: center; text-align: center; line-height: 1.4; }
-  .exec-admin-photo:hover .upload-overlay { display: flex; }
+
+  /* 검색 드롭다운 */
+  .exec-search-wrap { position: relative; margin-bottom: 6px; text-align: left; }
+  .exec-search-input { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-xs); padding: 6px 10px; font-size: 12px; font-family: 'Noto Sans KR',sans-serif; outline: none; background: white; cursor: pointer; }
+  .exec-search-input:focus { border-color: var(--gold); }
+  .exec-search-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: var(--radius-xs); box-shadow: var(--shadow); z-index: 100; max-height: 200px; overflow-y: auto; display: none; }
+  .exec-search-dropdown.open { display: block; }
+  .exec-search-item { padding: 8px 12px; font-size: 12px; cursor: pointer; text-align: left; color: var(--brown); transition: background 0.15s; }
+  .exec-search-item:hover, .exec-search-item.selected { background: rgba(201,168,76,0.1); color: var(--gold); font-weight: 600; }
+  .exec-search-item.clear { color: var(--gray-dark); font-style: italic; }
 
   /* Login */
   .login-box { max-width: 400px; margin: 60px auto; background: white; border-radius: var(--radius); box-shadow: var(--shadow); padding: 40px 36px; text-align: center; }
@@ -2951,67 +2957,136 @@ function renderAdminLists() {
 }
 
 function renderExecAdmin() {
-  // 회원사 드롭다운 옵션
-  const memberOptions = '<option value="">-- 선택 안 함 --</option>' +
-    [...D.members].sort((a,b)=>a.company.localeCompare(b.company,'ko')).map(m =>
-      `<option value="${m.id}">${m.company} (${m.rep})</option>`
-    ).join('');
+  const sortedMembers = [...D.members].sort((a,b)=>a.company.localeCompare(b.company,'ko'));
 
   document.getElementById('exec-admin-grid').innerHTML = EXEC_ROLES.map(role => {
     const ex = D.exec[role.key] || {};
-    const memberId = ex.memberId || '';
-    const photo = getPhoto('exec', role.key) || (memberId ? getPhoto('member', parseInt(memberId)) : '');
+    const memberId = ex.memberId ? parseInt(ex.memberId) : null;
+    const photo = getPhoto('exec', role.key) || (memberId ? getPhoto('member', memberId) : '');
     const name = ex.name || role.defaultName;
-    const company = ex.company || role.defaultCompany;
+    const selectedLabel = memberId
+      ? (D.members.find(m=>m.id===memberId) ? D.members.find(m=>m.id===memberId).company + ' (' + D.members.find(m=>m.id===memberId).rep + ')' : name)
+      : '-- 선택 안 함 --';
 
     return `<div class="exec-admin-card">
       <div class="role-label">${role.label}</div>
-      <!-- 사진 미리보기 -->
-      <div class="exec-admin-photo" style="cursor:default;border:2px solid var(--cream-dark)">
-        ${photo ? `<img src="${photo}" alt="${name}">` : '<span>👤</span>'}
+      <div class="exec-admin-photo" id="ep-${role.key}">
+        ${photo ? `<img src="${photo}" alt="${name}" id="epimg-${role.key}">` : `<span id="epimg-${role.key}">👤</span>`}
       </div>
-      <!-- 회원사 드롭다운 -->
-      <select class="form-input" id="es-${role.key}" style="font-size:12px;padding:6px 8px;margin-bottom:6px"
-        onchange="onExecMemberSelect('${role.key}',this)">
-        ${memberOptions.replace(`value="${memberId}"`, `value="${memberId}" selected`)}
-      </select>
-      <!-- 이름 (자동입력, 수동수정 가능) -->
+
+      <!-- 검색 드롭다운 -->
+      <div class="exec-search-wrap">
+        <input type="text" class="exec-search-input" id="esearch-${role.key}"
+          value="${selectedLabel}"
+          placeholder="회원사 검색..."
+          onfocus="openExecDropdown('${role.key}')"
+          oninput="filterExecDropdown('${role.key}',this.value)"
+          autocomplete="off">
+        <div class="exec-search-dropdown" id="edrop-${role.key}">
+          <div class="exec-search-item clear" onclick="clearExecSelect('${role.key}')">선택 안 함</div>
+          ${sortedMembers.map(m=>`<div class="exec-search-item${memberId===m.id?' selected':''}" onclick="selectExecMember('${role.key}',${m.id},'${m.rep.replace(/'/g,"\\'")}','${m.company.replace(/'/g,"\\'")}')">
+            ${m.company} <span style="color:var(--gray-dark)">(${m.rep})</span>
+          </div>`).join('')}
+        </div>
+      </div>
+
       <input class="form-input" id="en-${role.key}" value="${name}" placeholder="이름"
         style="font-size:13px;padding:6px 10px;margin-bottom:6px">
       <button class="btn btn-primary" style="width:100%;font-size:12px;padding:7px"
         onclick="saveExecMember('${role.key}')">저장</button>
     </div>`;
   }).join('');
+
+  // 외부 클릭 시 드롭다운 닫기
+  document.addEventListener('click', closeAllExecDropdowns, { once: false });
 }
 
-function onExecMemberSelect(key, sel) {
-  const memberId = parseInt(sel.value);
-  if(!memberId) return;
-  const m = D.members.find(x => x.id === memberId);
+function openExecDropdown(key) {
+  // 다른 드롭다운 먼저 닫기
+  EXEC_ROLES.forEach(r => {
+    if(r.key !== key) document.getElementById('edrop-'+r.key)?.classList.remove('open');
+  });
+  document.getElementById('edrop-'+key).classList.add('open');
+  document.getElementById('esearch-'+key).select();
+}
+
+function filterExecDropdown(key, query) {
+  const drop = document.getElementById('edrop-'+key);
+  drop.classList.add('open');
+  const q = query.trim().toLowerCase();
+  drop.querySelectorAll('.exec-search-item:not(.clear)').forEach(el => {
+    el.style.display = el.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function closeAllExecDropdowns(e) {
+  if(e.target.closest('.exec-search-wrap')) return;
+  EXEC_ROLES.forEach(r => {
+    document.getElementById('edrop-'+r.key)?.classList.remove('open');
+  });
+}
+
+function selectExecMember(key, memberId, rep, company) {
+  const m = D.members.find(x=>x.id===memberId);
   if(!m) return;
-  // 이름 자동 채우기
-  document.getElementById('en-'+key).value = m.rep;
-  // 회원사 대표 사진이 있으면 집행부 사진으로 자동 복사
-  const memberPhoto = getPhoto('member', m.id);
-  if(memberPhoto) {
-    photoCache['exec_'+key] = memberPhoto;
-    idbSet('exec_'+key, memberPhoto).then(() => renderExecAdmin());
-  } else {
-    renderExecAdmin();
+
+  // 검색창 텍스트 업데이트
+  document.getElementById('esearch-'+key).value = company + ' (' + rep + ')';
+  document.getElementById('en-'+key).value = rep;
+  document.getElementById('edrop-'+key).classList.remove('open');
+
+  // 선택 항목 하이라이트
+  document.querySelectorAll(`#edrop-${key} .exec-search-item`).forEach(el => el.classList.remove('selected'));
+  event.target.closest('.exec-search-item').classList.add('selected');
+
+  // 사진 업데이트 (전체 리렌더 없이)
+  const photo = getPhoto('member', memberId);
+  const photoEl = document.getElementById('ep-'+key);
+  if(photoEl) {
+    if(photo) {
+      photoEl.innerHTML = `<img src="${photo}" alt="${rep}" style="width:100%;height:100%;object-fit:cover">`;
+    } else {
+      photoEl.innerHTML = `<span>👤</span>`;
+    }
   }
+
+  // 임시 저장 (저장 버튼 누를 때 사용)
+  if(!D.exec[key]) D.exec[key] = {};
+  D.exec[key]._pendingMemberId = memberId;
+}
+
+function clearExecSelect(key) {
+  document.getElementById('esearch-'+key).value = '-- 선택 안 함 --';
+  document.getElementById('edrop-'+key).classList.remove('open');
+  document.getElementById('ep-'+key).innerHTML = '<span>👤</span>';
+  if(!D.exec[key]) D.exec[key] = {};
+  D.exec[key]._pendingMemberId = null;
 }
 
 function saveExecMember(key) {
   if(!D.exec[key]) D.exec[key] = {};
-  const sel = document.getElementById('es-'+key);
-  const memberId = parseInt(sel.value) || null;
-  const m = memberId ? D.members.find(x => x.id === memberId) : null;
+  const pending = D.exec[key]._pendingMemberId;
+  // _pendingMemberId가 있으면 사용, 없으면 기존 memberId 유지
+  const memberId = pending !== undefined ? pending : (D.exec[key].memberId || null);
+  const m = memberId ? D.members.find(x=>x.id===memberId) : null;
+
   D.exec[key].memberId = memberId || '';
   D.exec[key].name = document.getElementById('en-'+key).value.trim() || (m ? m.rep : '');
   D.exec[key].company = m ? m.company : '';
+  delete D.exec[key]._pendingMemberId;
+
+  // 회원사 대표 사진을 집행부 사진으로 복사
+  if(m) {
+    const memberPhoto = getPhoto('member', m.id);
+    if(memberPhoto) {
+      photoCache['exec_'+key] = memberPhoto;
+      idbSet('exec_'+key, memberPhoto);
+    }
+  }
+
   saveExec();
   renderOrg();
-  showToast(`${EXEC_ROLES.find(r=>r.key===key)?.label || ''} 저장되었습니다!`);
+  showToast(`${EXEC_ROLES.find(r=>r.key===key)?.label || ''} 저장 완료!`);
 }
 
 function uploadExecPhoto(key, input) {
