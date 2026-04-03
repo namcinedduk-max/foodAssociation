@@ -2527,8 +2527,14 @@ function submitStep1() {
     document.getElementById('submit-store').value = submitTargetMember.store||'';
     document.getElementById('submit-desc').value  = (submitTargetMember.desc||'').replace(/^\[[^\]]+\]\s*/,'');
     document.getElementById('submit-tags').value  = (submitTargetMember.tags||[]).join(', ');
-    // 기존 상품 슬롯 채우기
-    submitProductSlots = (submitTargetMember.products||[]).map(p=>({name:p.name||'',desc:p.desc||'',emoji:p.emoji||'📦'}));
+    // 기존 상품 슬롯 채우기 (사진 포함)
+    submitProductSlots = (submitTargetMember.products||[]).map((p,si)=>{
+      const photos = [0,1].map(pi => {
+        const key = `product_${submitTargetMember.id}_${si}_${pi}`;
+        return photoCache[key] || null;
+      });
+      return {name:p.name||'',desc:p.desc||'',emoji:p.emoji||'📦',photos};
+    });
     renderSubmitProductSlots();
   } else {
     if(!document.getElementById('submit-new-company').value.trim()) { showToast('회사명을 입력해주세요.'); return; }
@@ -2616,6 +2622,16 @@ async function submitFinal() {
     if(submitPendingLogo) {
       photoOps.push(savePhoto('logo_'+memberId, submitPendingLogo));
     }
+    // 상품 사진 저장 (최대 2장씩)
+    submitProductSlots.forEach((p, si) => {
+      (p.photos||[]).forEach((photo, pi) => {
+        if(photo) {
+          const key = `product_${memberId}_${si}_${pi}`;
+          photoCache[key] = photo;
+          photoOps.push(savePhoto(key, photo));
+        }
+      });
+    });
     await Promise.all(photoOps);
     await saveMembers();
 
@@ -2922,29 +2938,58 @@ let submitProductSlots = [];
 
 function addSubmitProductSlot() {
   if(submitProductSlots.length >= 6) { showToast('최대 6개까지 추가 가능합니다.'); return; }
-  submitProductSlots.push({ name:'', desc:'', emoji:'📦' });
+  submitProductSlots.push({ name:'', desc:'', emoji:'📦', photos:[] });
   renderSubmitProductSlots();
 }
 
 function renderSubmitProductSlots() {
   const list = document.getElementById('submit-products-list');
   if(!list) return;
-  list.innerHTML = submitProductSlots.map((p,i) => `
-    <div style="background:var(--surface-2);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;border:1px solid var(--border)">
+  list.innerHTML = submitProductSlots.map((p,i) => {
+    const photoBoxes = [0,1].map(pi => {
+      const photo = p.photos && p.photos[pi];
+      return photo
+        ? `<div style="position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;flex-shrink:0">
+             <img src="${photo}" style="width:100%;height:100%;object-fit:cover">
+             <button onclick="removeSubmitProductPhoto(${i},${pi})" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);border:none;color:white;width:20px;height:20px;border-radius:50%;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+           </div>`
+        : `<div onclick="document.getElementById('spp-${i}-${pi}').click()"
+             style="width:80px;height:80px;border-radius:8px;border:2px dashed var(--border);background:var(--surface-2);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;gap:4px">
+             <input type="file" id="spp-${i}-${pi}" accept="image/*" style="display:none" onchange="onSubmitProductPhoto(${i},${pi},this)">
+             <span style="font-size:20px">📷</span>
+             <span style="font-size:10px;color:var(--gray-dark)">사진 ${pi+1}</span>
+           </div>`;
+    }).join('');
+
+    return `<div style="background:var(--surface-2);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;border:1px solid var(--border)">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <span style="font-size:13px;font-weight:700;color:var(--brown)">상품 ${i+1}</span>
         <button onclick="removeSubmitProduct(${i})" style="background:none;border:none;cursor:pointer;color:var(--gray-dark);font-size:16px">✕</button>
       </div>
-      <div class="form-row">
+      <div style="display:flex;gap:10px;margin-bottom:12px">${photoBoxes}</div>
+      <div class="form-row" style="margin-bottom:10px">
         <div class="form-group" style="margin:0"><label class="form-label">상품명</label><input class="form-input" value="${p.name}" placeholder="예: 프리미엄 조미김" oninput="submitProductSlots[${i}].name=this.value"></div>
         <div class="form-group" style="margin:0"><label class="form-label">이모지</label><input class="form-input" value="${p.emoji}" placeholder="📦" style="width:80px" oninput="submitProductSlots[${i}].emoji=this.value"></div>
       </div>
-      <div class="form-group" style="margin-top:10px;margin-bottom:0"><label class="form-label">상품 설명</label><input class="form-input" value="${p.desc}" placeholder="간략한 상품 설명" oninput="submitProductSlots[${i}].desc=this.value"></div>
-    </div>`).join('');
+      <div class="form-group" style="margin:0"><label class="form-label">상품 설명</label><input class="form-input" value="${p.desc}" placeholder="간략한 상품 설명" oninput="submitProductSlots[${i}].desc=this.value"></div>
+    </div>`;
+  }).join('');
 }
 
-function removeSubmitProduct(i) {
-  submitProductSlots.splice(i,1);
+function onSubmitProductPhoto(slotIdx, photoIdx, input) {
+  const f = input.files[0]; if(!f) return;
+  resizeToBase64(f, 600, 600, 0.82).then(b64 => {
+    if(!submitProductSlots[slotIdx].photos) submitProductSlots[slotIdx].photos = [];
+    submitProductSlots[slotIdx].photos[photoIdx] = b64;
+    renderSubmitProductSlots();
+  });
+  input.value = '';
+}
+
+function removeSubmitProductPhoto(slotIdx, photoIdx) {
+  if(submitProductSlots[slotIdx].photos) {
+    submitProductSlots[slotIdx].photos[photoIdx] = null;
+  }
   renderSubmitProductSlots();
 }
 
