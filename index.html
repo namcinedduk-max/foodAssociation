@@ -944,6 +944,13 @@
         <input class="form-input" id="submit-tags" placeholder="쉼표로 구분: 조미김, 구운김, 파래김">
       </div>
 
+      <!-- 주력상품 -->
+      <div class="divider" style="margin:16px 0"></div>
+      <div style="font-size:14px;font-weight:700;color:var(--brown);margin-bottom:4px">📦 주력상품 소개 <span style="font-size:11px;font-weight:400;color:var(--gray-dark)">(선택사항, 최대 6개)</span></div>
+      <p style="font-size:12px;color:var(--gray-dark);margin-bottom:12px">상품명과 설명을 입력하면 회사 상세페이지에 표시됩니다.</p>
+      <div id="submit-products-list"></div>
+      <button type="button" onclick="addSubmitProductSlot()" style="width:100%;padding:10px;border:2px dashed var(--border);border-radius:var(--radius-sm);background:none;cursor:pointer;color:var(--gold);font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;margin-bottom:8px">+ 상품 추가</button>
+
       <div style="display:flex;gap:10px;margin-top:8px">
         <button class="btn" style="background:var(--surface-2);color:var(--gray-dark);flex:1" onclick="submitGoBack()">← 이전</button>
         <button class="btn btn-gold" style="flex:2" onclick="submitStep2()">다음 단계 →</button>
@@ -1059,8 +1066,8 @@
 
         <!-- EXEC -->
         <div class="admin-content" id="admin-exec">
-          <h3 style="font-size:15px;color:var(--green-deep);margin-bottom:6px">집행부 정보 및 사진 관리</h3>
-          <p style="font-size:13px;color:var(--gray-dark);margin-bottom:20px">📸 사진 원 클릭 → 사진 업로드 | 이름·소속 수정 후 저장 버튼 클릭</p>
+          <h3 style="font-size:15px;color:var(--green-deep);margin-bottom:6px">집행부 구성 관리</h3>
+          <p style="font-size:13px;color:var(--gray-dark);margin-bottom:20px">회원사 목록에서 선택하면 이름·사진이 자동으로 채워집니다.</p>
           <div class="exec-admin-grid" id="exec-admin-grid"></div>
         </div>
 
@@ -1171,6 +1178,13 @@
             <div class="form-group"><label class="form-label">주요 제품 태그</label><input class="form-input" id="m-tags" placeholder="쉼표로 구분: 고추장, 된장, 쌈장"></div>
             <div class="form-group"><label class="form-label">자사몰 주소 <span class="opt">(없으면 비워두세요)</span></label><input class="form-input" id="m-store" placeholder="https://smartstore.naver.com/..."></div>
           </div>
+          <!-- 주력상품 -->
+          <div class="divider" style="margin:16px 0"></div>
+          <div style="font-size:14px;font-weight:700;color:var(--green-deep);margin-bottom:4px">📦 주력상품 소개 <span style="font-size:11px;font-weight:400;color:var(--gray-dark)">(최대 6개, 선택사항)</span></div>
+          <p style="font-size:12px;color:var(--gray-dark);margin-bottom:12px">상품명·설명·사진을 추가하면 회사 상세페이지에 표시됩니다.</p>
+          <div id="m-products-list"></div>
+          <button type="button" onclick="addNewMemberProductSlot()" style="width:100%;padding:10px;border:2px dashed var(--cream-dark);border-radius:var(--radius-sm);background:none;cursor:pointer;color:var(--green-mid);font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif">+ 상품 추가</button>
+          <div class="divider" style="margin:16px 0"></div>
           <button class="btn btn-gold" onclick="addMember()">+ 회원사 등록</button>
           <div class="divider"></div>
           <h3 style="font-size:15px;color:var(--green-deep);margin-bottom:14px">등록된 회원사 목록</h3>
@@ -1943,7 +1957,10 @@ function emptyState(i,m) { return `<div class="empty-state" style="grid-column:1
 function renderOrg() {
   EXEC_ROLES.forEach(role => {
     const ex = D.exec[role.key] || {};
-    setExecCard(role.key, ex.name||role.defaultName, ex.company||role.defaultCompany, getPhoto('exec', role.key));
+    const memberId = ex.memberId ? parseInt(ex.memberId) : null;
+    // 집행부 전용 사진 → 없으면 회원사 대표 사진 사용
+    const photo = getPhoto('exec', role.key) || (memberId ? getPhoto('member', memberId) : '');
+    setExecCard(role.key, ex.name||role.defaultName, ex.company||role.defaultCompany, photo);
   });
 }
 function setExecCard(key, name, company, photo) {
@@ -2446,6 +2463,7 @@ function checkSubmitPw() {
   ['submit-rep','submit-phone','submit-email','submit-store','submit-desc','submit-tags','submit-new-company','submit-new-category'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value = '';
   });
+  submitProductSlots = [];
   document.getElementById('submit-photo-preview').innerHTML = '<span>📷</span>';
   document.getElementById('submit-logo-preview').innerHTML = '<span>🏢</span>';
   document.getElementById('submit-step1').style.display = 'block';
@@ -2471,6 +2489,9 @@ function submitStep1() {
     document.getElementById('submit-store').value = submitTargetMember.store||'';
     document.getElementById('submit-desc').value  = (submitTargetMember.desc||'').replace(/^\[[^\]]+\]\s*/,'');
     document.getElementById('submit-tags').value  = (submitTargetMember.tags||[]).join(', ');
+    // 기존 상품 슬롯 채우기
+    submitProductSlots = (submitTargetMember.products||[]).map(p=>({name:p.name||'',desc:p.desc||'',emoji:p.emoji||'📦'}));
+    renderSubmitProductSlots();
   } else {
     if(!document.getElementById('submit-new-company').value.trim()) { showToast('회사명을 입력해주세요.'); return; }
   }
@@ -2534,14 +2555,18 @@ async function submitFinal() {
 
     if(submitType==='existing') {
       memberId = submitTargetMember.id;
-      updatedMember = Object.assign({},submitTargetMember,{rep,phone,email,store,desc,tags});
+      const products = submitProductSlots.length > 0
+        ? submitProductSlots.map(p=>({name:p.name,desc:p.desc,emoji:p.emoji||'📦'}))
+        : submitTargetMember.products || [];
+      updatedMember = Object.assign({},submitTargetMember,{rep,phone,email,store,desc,tags,products});
       const idx=D.members.findIndex(m=>m.id===memberId);
       if(idx!==-1) D.members[idx]=updatedMember;
     } else {
       memberId=Date.now();
       const company=document.getElementById('submit-new-company').value.trim();
       const category=document.getElementById('submit-new-category').value.trim()||'기타';
-      updatedMember={id:memberId,company,rep,phone,email,category,emoji:'🏢',desc,tags,store};
+      const products=submitProductSlots.map(p=>({name:p.name,desc:p.desc,emoji:p.emoji||'📦'}));
+      updatedMember={id:memberId,company,rep,phone,email,category,emoji:'🏢',desc,tags,store,products};
       D.members.push(updatedMember);
     }
 
@@ -2824,8 +2849,69 @@ function renderTransactions() {
 }
 
 
+// 신규등록 폼용 상품 슬롯
+let newMemberProductSlots = [];
+
+function addNewMemberProductSlot() {
+  if(newMemberProductSlots.length >= 6) { showToast('최대 6개까지 추가 가능합니다.'); return; }
+  newMemberProductSlots.push({ name:'', desc:'', emoji:'📦' });
+  renderNewMemberProductSlots();
+}
+
+function renderNewMemberProductSlots() {
+  const list = document.getElementById('m-products-list');
+  if(!list) return;
+  list.innerHTML = newMemberProductSlots.map((p,i) => `
+    <div style="background:var(--gray-light);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:13px;font-weight:700;color:var(--brown)">상품 ${i+1}</span>
+        <button onclick="removeNewMemberProduct(${i})" style="background:none;border:none;cursor:pointer;color:var(--gray-dark);font-size:16px">✕</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin:0"><label class="form-label">상품명</label><input class="form-input" value="${p.name}" placeholder="예: 프리미엄 조미김" oninput="newMemberProductSlots[${i}].name=this.value"></div>
+        <div class="form-group" style="margin:0"><label class="form-label">이모지</label><input class="form-input" value="${p.emoji}" placeholder="📦" style="width:80px" oninput="newMemberProductSlots[${i}].emoji=this.value"></div>
+      </div>
+      <div class="form-group" style="margin-top:10px;margin-bottom:0"><label class="form-label">상품 설명</label><input class="form-input" value="${p.desc}" placeholder="간략한 상품 설명" oninput="newMemberProductSlots[${i}].desc=this.value"></div>
+    </div>`).join('');
+}
+
+function removeNewMemberProduct(i) {
+  newMemberProductSlots.splice(i,1);
+  renderNewMemberProductSlots();
+}
+
+// 정보등록 폼용 상품 슬롯
+let submitProductSlots = [];
+
+function addSubmitProductSlot() {
+  if(submitProductSlots.length >= 6) { showToast('최대 6개까지 추가 가능합니다.'); return; }
+  submitProductSlots.push({ name:'', desc:'', emoji:'📦' });
+  renderSubmitProductSlots();
+}
+
+function renderSubmitProductSlots() {
+  const list = document.getElementById('submit-products-list');
+  if(!list) return;
+  list.innerHTML = submitProductSlots.map((p,i) => `
+    <div style="background:var(--surface-2);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;border:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:13px;font-weight:700;color:var(--brown)">상품 ${i+1}</span>
+        <button onclick="removeSubmitProduct(${i})" style="background:none;border:none;cursor:pointer;color:var(--gray-dark);font-size:16px">✕</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin:0"><label class="form-label">상품명</label><input class="form-input" value="${p.name}" placeholder="예: 프리미엄 조미김" oninput="submitProductSlots[${i}].name=this.value"></div>
+        <div class="form-group" style="margin:0"><label class="form-label">이모지</label><input class="form-input" value="${p.emoji}" placeholder="📦" style="width:80px" oninput="submitProductSlots[${i}].emoji=this.value"></div>
+      </div>
+      <div class="form-group" style="margin-top:10px;margin-bottom:0"><label class="form-label">상품 설명</label><input class="form-input" value="${p.desc}" placeholder="간략한 상품 설명" oninput="submitProductSlots[${i}].desc=this.value"></div>
+    </div>`).join('');
+}
+
+function removeSubmitProduct(i) {
+  submitProductSlots.splice(i,1);
+  renderSubmitProductSlots();
+}
+
 function changeMemberPw() {
-  const newPw = document.getElementById('member-pw-new').value.trim();
   if(!newPw) { showToast('새 비밀번호를 입력해주세요.'); return; }
   D.memberPw = newPw;
   LS.set('memberPw', newPw);
@@ -2865,24 +2951,67 @@ function renderAdminLists() {
 }
 
 function renderExecAdmin() {
+  // 회원사 드롭다운 옵션
+  const memberOptions = '<option value="">-- 선택 안 함 --</option>' +
+    [...D.members].sort((a,b)=>a.company.localeCompare(b.company,'ko')).map(m =>
+      `<option value="${m.id}">${m.company} (${m.rep})</option>`
+    ).join('');
+
   document.getElementById('exec-admin-grid').innerHTML = EXEC_ROLES.map(role => {
     const ex = D.exec[role.key] || {};
-    const photo = getPhoto('exec', role.key);
-    const name = ex.name||role.defaultName;
-    const company = ex.company||role.defaultCompany;
+    const memberId = ex.memberId || '';
+    const photo = getPhoto('exec', role.key) || (memberId ? getPhoto('member', parseInt(memberId)) : '');
+    const name = ex.name || role.defaultName;
+    const company = ex.company || role.defaultCompany;
+
     return `<div class="exec-admin-card">
       <div class="role-label">${role.label}</div>
-      <div class="exec-admin-photo" onclick="document.getElementById('ef-${role.key}').click()" title="클릭하여 사진 업로드">
-        ${getPhoto('exec',role.key)?`<img src="${getPhoto('exec',role.key)}" alt="${name}">`:'<span>👤</span>'}
-        <div class="upload-overlay">📷 업로드</div>
-        <input type="file" id="ef-${role.key}" accept="image/*" onchange="uploadExecPhoto('${role.key}',this)">
+      <!-- 사진 미리보기 -->
+      <div class="exec-admin-photo" style="cursor:default;border:2px solid var(--cream-dark)">
+        ${photo ? `<img src="${photo}" alt="${name}">` : '<span>👤</span>'}
       </div>
-      <input class="form-input" id="en-${role.key}" value="${name}" placeholder="이름" style="font-size:13px;padding:6px 10px;margin-bottom:6px">
-      <input class="form-input" id="ec-${role.key}" value="${company}" placeholder="소속 회원사" style="font-size:12px;padding:6px 10px;margin-bottom:8px">
-      <button class="btn btn-primary" style="width:100%;font-size:12px;padding:7px" onclick="saveExec('${role.key}')">저장</button>
-      ${getPhoto('exec',role.key)?`<button onclick="removeExecPhoto('${role.key}')" style="width:100%;margin-top:5px;padding:5px;font-size:11px;background:none;border:1px solid var(--gray-mid);border-radius:var(--radius-sm);cursor:pointer;color:var(--gray-dark)">🗑 사진 삭제</button>`:''}
+      <!-- 회원사 드롭다운 -->
+      <select class="form-input" id="es-${role.key}" style="font-size:12px;padding:6px 8px;margin-bottom:6px"
+        onchange="onExecMemberSelect('${role.key}',this)">
+        ${memberOptions.replace(`value="${memberId}"`, `value="${memberId}" selected`)}
+      </select>
+      <!-- 이름 (자동입력, 수동수정 가능) -->
+      <input class="form-input" id="en-${role.key}" value="${name}" placeholder="이름"
+        style="font-size:13px;padding:6px 10px;margin-bottom:6px">
+      <button class="btn btn-primary" style="width:100%;font-size:12px;padding:7px"
+        onclick="saveExecMember('${role.key}')">저장</button>
     </div>`;
   }).join('');
+}
+
+function onExecMemberSelect(key, sel) {
+  const memberId = parseInt(sel.value);
+  if(!memberId) return;
+  const m = D.members.find(x => x.id === memberId);
+  if(!m) return;
+  // 이름 자동 채우기
+  document.getElementById('en-'+key).value = m.rep;
+  // 회원사 대표 사진이 있으면 집행부 사진으로 자동 복사
+  const memberPhoto = getPhoto('member', m.id);
+  if(memberPhoto) {
+    photoCache['exec_'+key] = memberPhoto;
+    idbSet('exec_'+key, memberPhoto).then(() => renderExecAdmin());
+  } else {
+    renderExecAdmin();
+  }
+}
+
+function saveExecMember(key) {
+  if(!D.exec[key]) D.exec[key] = {};
+  const sel = document.getElementById('es-'+key);
+  const memberId = parseInt(sel.value) || null;
+  const m = memberId ? D.members.find(x => x.id === memberId) : null;
+  D.exec[key].memberId = memberId || '';
+  D.exec[key].name = document.getElementById('en-'+key).value.trim() || (m ? m.rep : '');
+  D.exec[key].company = m ? m.company : '';
+  saveExec();
+  renderOrg();
+  showToast(`${EXEC_ROLES.find(r=>r.key===key)?.label || ''} 저장되었습니다!`);
 }
 
 function uploadExecPhoto(key, input) {
@@ -2904,15 +3033,6 @@ function removeExecPhoto(key) {
     showToast('사진이 삭제되었습니다.');
   });
 }
-function saveExec(key) {
-  if(!D.exec[key]) D.exec[key]={};
-  D.exec[key].name = document.getElementById('en-'+key).value.trim();
-  D.exec[key].company = document.getElementById('ec-'+key).value.trim();
-  saveExec();
-  renderOrg();
-  showToast('저장되었습니다!');
-}
-
 // ── MEMBER EDIT ──────────────────────────────────────────────
 let editingMemberId = null;
 let pendingEditPhoto = null; // null=변경없음, ''=삭제, 'data:...'=새사진
@@ -3104,6 +3224,7 @@ function addMember() {
     desc: document.getElementById('m-desc').value.trim(),
     tags: document.getElementById('m-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
     store: document.getElementById('m-store').value.trim(),
+    products: newMemberProductSlots.map(p=>({name:p.name,desc:p.desc,emoji:p.emoji||'📦'})),
   });
   const newId = newMid;
   const photoToSave = pendingMemberPhoto;
@@ -3118,6 +3239,8 @@ function addMember() {
     ['m-company','m-rep','m-phone','m-email','m-category','m-emoji','m-desc','m-tags','m-store'].forEach(id=>document.getElementById(id).value='');
     pendingMemberPhoto = '';
     pendingMemberLogo = '';
+    newMemberProductSlots = [];
+    renderNewMemberProductSlots();
     document.getElementById('m-photo-preview').innerHTML = '<span>📷</span>';
     document.getElementById('m-logo-preview').innerHTML = '<span>🏢</span>';
     document.getElementById('m-photo-input').value = '';
