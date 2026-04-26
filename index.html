@@ -1641,21 +1641,29 @@ let D = {
 let photoCache = {}; // key: 'member_ID' | 'gallery_ID' | 'exec_KEY' | 'exec_photo_KEY'
 
 async function loadAllPhotos() {
-  // 1. 로컬 IndexedDB에서 먼저 로드 (빠름)
+  // 1. 로컬 IndexedDB에서 먼저 로드 (빠름 - 항상 먼저)
   try {
     const all = await idbGetAll('');
     photoCache = all;
   } catch(e) { console.warn('로컬 사진 로드 실패', e); }
 
-  // 2. Supabase photos 테이블에서 로드 (공유된 사진)
+  // 2. Supabase photos - 로컬에 없는 것만 받아옴 (백그라운드)
   try {
-    const { data, error } = await supa.from('photos').select('key, data');
+    const { data, error } = await supa.from('photos').select('key');
     if(!error && data) {
-      data.forEach(row => {
-        photoCache[row.key] = row.data;
-        // 로컬에도 캐시
-        idbSet(row.key, row.data).catch(()=>{});
-      });
+      const missingKeys = data.map(r=>r.key).filter(k => !photoCache[k]);
+      if(missingKeys.length > 0) {
+        // 없는 사진만 가져오기
+        const { data: photoData } = await supa.from('photos')
+          .select('key, data')
+          .in('key', missingKeys);
+        if(photoData) {
+          photoData.forEach(row => {
+            photoCache[row.key] = row.data;
+            idbSet(row.key, row.data).catch(()=>{});
+          });
+        }
+      }
     }
   } catch(e) { console.warn('Supabase 사진 로드 실패', e); }
 }
@@ -3830,7 +3838,7 @@ async function saveSettings() {
 }
 
 async function initApp() {
-  // 로컬 데이터 먼저 로드 (빠른 초기 렌더링)
+  // 1. 로컬 데이터로 즉시 렌더링 (빠름)
   const dataVer = LS.get('dataVersion');
   if (dataVer !== 'v5') {
     D.members = sampleMembers();
@@ -3839,13 +3847,23 @@ async function initApp() {
   }
   await loadAllPhotos();
   renderHome();
-
-  // Supabase에서 최신 데이터 로드 후 재렌더링
-  await loadFromSupabase();
-  await loadAllPhotos();
-  renderHome();
   renderOrg();
-  if(document.getElementById('page-members').classList.contains('active')) renderMembers();
+
+  // 2. Supabase에서 최신 데이터 백그라운드 로드 (느려도 괜찮음)
+  loadFromSupabase().then(async () => {
+    await loadAllPhotos();
+    renderHome();
+    renderOrg();
+    const activePage = document.querySelector('.page.active');
+    if(activePage) {
+      const pageId = activePage.id.replace('page-','');
+      if(pageId === 'members') renderMembers();
+      if(pageId === 'gallery') renderGallery(document.getElementById('gallery-grid'));
+      if(pageId === 'notice') renderNotices(document.getElementById('notice-list'));
+      if(pageId === 'finance-public') renderPublicFinance();
+      if(pageId === 'docs') renderDocs();
+    }
+  });
 }
 initApp();
 </script>
