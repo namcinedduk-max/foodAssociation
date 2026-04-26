@@ -596,8 +596,8 @@
           <div class="exec-badge">👑 회장</div>
           <div class="exec-photo lg" id="ephoto-president"><span id="eemoji-president">👤</span></div>
           <div class="exec-title">회 장</div>
-          <div class="exec-name" id="ename-president">홍길동</div>
-          <div class="exec-company" id="ecompany-president">(주)맛나식품</div>
+          <div class="exec-name" id="ename-president"></div>
+          <div class="exec-company" id="ecompany-president"></div>
         </div>
       </div>
 
@@ -614,8 +614,8 @@
           <div class="exec-card" id="ecard-vice-president">
             <div class="exec-photo" id="ephoto-vice-president"><span id="eemoji-vice-president">👤</span></div>
             <div class="exec-title">차기회장</div>
-            <div class="exec-name" id="ename-vice-president">김대한</div>
-            <div class="exec-company" id="ecompany-vice-president">자연그대로영농조합</div>
+            <div class="exec-name" id="ename-vice-president"></div>
+            <div class="exec-company" id="ecompany-vice-president"></div>
           </div>
         </div>
         <div class="tree-branch">
@@ -623,8 +623,8 @@
           <div class="exec-card vice-type" id="ecard-vp">
             <div class="exec-photo" id="ephoto-vp"><span id="eemoji-vp">👤</span></div>
             <div class="exec-title">부회장</div>
-            <div class="exec-name" id="ename-vp">이민수</div>
-            <div class="exec-company" id="ecompany-vp">한울음료(주)</div>
+            <div class="exec-name" id="ename-vp"></div>
+            <div class="exec-company" id="ecompany-vp"></div>
           </div>
         </div>
         <div class="tree-branch">
@@ -632,8 +632,8 @@
           <div class="exec-card" id="ecard-advisor">
             <div class="exec-photo" id="ephoto-advisor"><span id="eemoji-advisor">👤</span></div>
             <div class="exec-title">고 문</div>
-            <div class="exec-name" id="ename-advisor">박원로</div>
-            <div class="exec-company" id="ecompany-advisor">달콤공방</div>
+            <div class="exec-name" id="ename-advisor"></div>
+            <div class="exec-company" id="ecompany-advisor"></div>
           </div>
         </div>
       </div>
@@ -650,8 +650,8 @@
           <div class="exec-card" id="ecard-secretary1">
             <div class="exec-photo" id="ephoto-secretary1"><span id="eemoji-secretary1">👤</span></div>
             <div class="exec-title">사무국장</div>
-            <div class="exec-name" id="ename-secretary1">최사무</div>
-            <div class="exec-company" id="ecompany-secretary1">해안수산식품</div>
+            <div class="exec-name" id="ename-secretary1"></div>
+            <div class="exec-company" id="ecompany-secretary1"></div>
           </div>
         </div>
         <div class="tree-branch">
@@ -659,7 +659,7 @@
           <div class="exec-card" id="ecard-secretary2">
             <div class="exec-photo" id="ephoto-secretary2"><span id="eemoji-secretary2">👤</span></div>
             <div class="exec-title">사무국장</div>
-            <div class="exec-name" id="ename-secretary2">정사무</div>
+            <div class="exec-name" id="ename-secretary2"></div>
             <div class="exec-company" id="ecompany-secretary2">회원사명</div>
           </div>
         </div>
@@ -668,7 +668,7 @@
           <div class="exec-card" id="ecard-finance">
             <div class="exec-photo" id="ephoto-finance"><span id="eemoji-finance">👤</span></div>
             <div class="exec-title">재무국장</div>
-            <div class="exec-name" id="ename-finance">윤재무</div>
+            <div class="exec-name" id="ename-finance"></div>
             <div class="exec-company" id="ecompany-finance">회원사명</div>
           </div>
         </div>
@@ -3844,6 +3844,7 @@ async function initApp() {
   await loadFromSupabase();
   await loadAllPhotos();
   renderHome();
+  renderOrg();
   if(document.getElementById('page-members').classList.contains('active')) renderMembers();
 }
 initApp();
