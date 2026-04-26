@@ -3689,39 +3689,49 @@ function showToast(msg) {
 // Supabase에서 전체 데이터 로드
 async function loadFromSupabase() {
   try {
-    showLoadingOverlay(true);
-
     // 병렬로 전체 테이블 로드
     const [members, gallery, notices, exec_info, finance, docs, settings] = await Promise.all([
       supa.from('members').select('*').order('id'),
       supa.from('gallery').select('*').order('id'),
       supa.from('notices').select('*').order('id'),
-      supa.from('exec_info').select('*').eq('id', 1).single(),
-      supa.from('finance').select('*').eq('id', 1).single(),
+      supa.from('exec_info').select('*').eq('id', 1).maybeSingle(),
+      supa.from('finance').select('*').eq('id', 1).maybeSingle(),
       supa.from('docs').select('*').order('id'),
-      supa.from('settings').select('*').eq('id', 1).single(),
+      supa.from('settings').select('*').eq('id', 1).maybeSingle(),
     ]);
 
-    if(members.data && members.data.length > 0)
+    if(members.data && members.data.length > 0) {
       D.members = members.data.map(r => r.data);
-    if(gallery.data && gallery.data.length > 0)
+      LS.set('members', D.members);
+    }
+    if(gallery.data && gallery.data.length > 0) {
       D.gallery = gallery.data.map(r => r.data);
-    if(notices.data && notices.data.length > 0)
+      LS.set('gallery', D.gallery);
+    }
+    if(notices.data && notices.data.length > 0) {
       D.notices = notices.data.map(r => r.data);
-    if(exec_info.data)
-      D.exec = exec_info.data.data || {};
-    if(finance.data)
-      D.finance = finance.data.data || D.finance;
-    if(docs.data && docs.data.length > 0)
+      LS.set('notices', D.notices);
+    }
+    if(exec_info.data && exec_info.data.data) {
+      D.exec = exec_info.data.data;
+      LS.set('exec', D.exec);
+    }
+    if(finance.data && finance.data.data) {
+      D.finance = finance.data.data;
+      LS.set('finance', D.finance);
+    }
+    if(docs.data && docs.data.length > 0) {
       D.docs = docs.data.map(r => r.data);
-    if(settings.data)
-      D.settings = settings.data.data || D.settings;
+      LS.set('docs', D.docs);
+    }
+    if(settings.data && settings.data.data) {
+      D.settings = settings.data.data;
+      LS.set('settings', D.settings);
+    }
 
-    console.log('✅ Supabase 데이터 로드 완료');
+    console.log('✅ Supabase 데이터 로드 완료', { exec: D.exec });
   } catch(e) {
     console.warn('Supabase 로드 실패, 로컬 데이터 사용:', e);
-  } finally {
-    showLoadingOverlay(false);
   }
 }
 
